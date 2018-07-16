@@ -81,13 +81,13 @@ TEST_CASE("audio_channel_format") {
     auto blockFormats =
         audioChannelFormat->getElementsInTimespan<AudioBlockFormatObjects>(
             std::chrono::seconds(10), std::chrono::seconds(15));
-    BOOST_CHECK(blockFormats[0]->get<Rtime>() == std::chrono::seconds(10));
-    BOOST_CHECK(blockFormats[1]->get<Rtime>() == std::chrono::seconds(11));
-    BOOST_CHECK(blockFormats[2]->get<Rtime>() == std::chrono::seconds(12));
-    BOOST_CHECK(blockFormats[3]->get<Rtime>() == std::chrono::seconds(13));
-    BOOST_CHECK(blockFormats[4]->get<Rtime>() == std::chrono::seconds(14));
-    BOOST_CHECK(blockFormats[4]->get<Rtime>() == std::chrono::seconds(14));
-    BOOST_CHECK(blockFormats[5]->get<Rtime>() == std::chrono::seconds(15));
+    REQUIRE(blockFormats[0]->get<Rtime>() == std::chrono::seconds(10));
+    REQUIRE(blockFormats[1]->get<Rtime>() == std::chrono::seconds(11));
+    REQUIRE(blockFormats[2]->get<Rtime>() == std::chrono::seconds(12));
+    REQUIRE(blockFormats[3]->get<Rtime>() == std::chrono::seconds(13));
+    REQUIRE(blockFormats[4]->get<Rtime>() == std::chrono::seconds(14));
+    REQUIRE(blockFormats[4]->get<Rtime>() == std::chrono::seconds(14));
+    REQUIRE(blockFormats[5]->get<Rtime>() == std::chrono::seconds(15));
   }
   */
 }

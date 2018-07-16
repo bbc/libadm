@@ -50,5 +50,27 @@ namespace adm {
       return stream << xmlDocument;
     }
 
+    std::ostream& XmlWriter::write(std::shared_ptr<const Frame> frame,
+                                   std::ostream& stream) {
+      XmlDocument xmlDocument;
+      xmlDocument.setDiscardDefaults(
+          !isSet(options_, WriterOptions::write_default_values));
+      xmlDocument.addDeclaration();
+      auto root = xmlDocument.addNode("frame");
+      root.addElement(frame->frameHeader(), "frameHeader", &formatFrameHeader);
+      auto formatExtended = root.addNode("audioFormatExtended");
+      // clang-format off
+      formatExtended.addBaseElements<AudioProgramme, AudioProgrammeId>(frame, "audioProgramme", &formatAudioProgramme);
+      formatExtended.addBaseElements<AudioContent, AudioContentId>(frame, "audioContent", &formatAudioContent);
+      formatExtended.addBaseElements<AudioObject, AudioObjectId>(frame, "audioObject", &formatAudioObject);
+      formatExtended.addBaseElements<AudioPackFormat, AudioPackFormatId>(frame, "audioPackFormat", &formatAudioPackFormat);
+      formatExtended.addBaseElements<AudioChannelFormat, AudioChannelFormatId>(frame, "audioChannelFormat", &formatAudioChannelFormat);
+      formatExtended.addBaseElements<AudioStreamFormat, AudioStreamFormatId>(frame, "audioStreamFormat", &formatAudioStreamFormat);
+      formatExtended.addBaseElements<AudioTrackFormat, AudioTrackFormatId>(frame, "audioTrackFormat", &formatAudioTrackFormat);
+      formatExtended.addBaseElements<AudioTrackUid, AudioTrackUidId>(frame, "audioTrackUID", &formatAudioTrackUid);
+      // clang-format on
+      return stream << xmlDocument;
+    }
+
   }  // namespace xml
 }  // namespace adm

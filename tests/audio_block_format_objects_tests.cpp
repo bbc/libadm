@@ -10,6 +10,9 @@ TEST_CASE("audio_block_format_objects") {
     REQUIRE(blockFormat.has<AudioBlockFormatId>() == true);
     REQUIRE(blockFormat.has<Rtime>() == true);
     REQUIRE(blockFormat.has<Duration>() == false);
+    REQUIRE(blockFormat.has<Lstart>() == false);
+    REQUIRE(blockFormat.has<Lduration>() == false);
+    REQUIRE(blockFormat.has<InitializeBlock>() == false);
     REQUIRE(blockFormat.has<Cartesian>() == true);
     REQUIRE(blockFormat.has<Width>() == true);
     REQUIRE(blockFormat.has<Height>() == true);
@@ -25,6 +28,9 @@ TEST_CASE("audio_block_format_objects") {
     REQUIRE(blockFormat.isDefault<AudioBlockFormatId>() == false);
     REQUIRE(blockFormat.isDefault<Rtime>() == true);
     REQUIRE(blockFormat.isDefault<Duration>() == false);
+    REQUIRE(blockFormat.isDefault<Lstart>() == false);
+    REQUIRE(blockFormat.isDefault<Lduration>() == false);
+    REQUIRE(blockFormat.isDefault<InitializeBlock>() == false);
     REQUIRE(blockFormat.isDefault<Cartesian>() == true);
     REQUIRE(blockFormat.isDefault<Width>() == true);
     REQUIRE(blockFormat.isDefault<Height>() == true);
@@ -53,6 +59,9 @@ TEST_CASE("audio_block_format_objects") {
 
     blockFormat.set(Rtime(std::chrono::seconds(2)));
     blockFormat.set(Duration(std::chrono::seconds(10)));
+    blockFormat.set(Lstart(std::chrono::seconds(0)));
+    blockFormat.set(Lduration(std::chrono::seconds(10)));
+    blockFormat.set(InitializeBlock(true));
     blockFormat.set(Cartesian(false));
     blockFormat.set(Width(45.f));
     blockFormat.set(Height(20.f));
@@ -69,6 +78,9 @@ TEST_CASE("audio_block_format_objects") {
 
     REQUIRE(blockFormat.get<Rtime>().get() == std::chrono::seconds(2));
     REQUIRE(blockFormat.get<Duration>().get() == std::chrono::seconds(10));
+    REQUIRE(blockFormat.get<Lstart>().get() == std::chrono::seconds(0));
+    REQUIRE(blockFormat.get<Lduration>().get() == std::chrono::seconds(10));
+    REQUIRE(blockFormat.get<InitializeBlock>() == true);
     REQUIRE(blockFormat.get<Cartesian>() == false);
     REQUIRE(blockFormat.get<Width>() == 45.f);
     REQUIRE(blockFormat.get<Height>() == 20.f);
@@ -77,7 +89,7 @@ TEST_CASE("audio_block_format_objects") {
     REQUIRE(blockFormat.get<Diffuse>() == 0.5f);
     REQUIRE(blockFormat.get<ChannelLock>().get<ChannelLockFlag>() == true);
     REQUIRE(blockFormat.get<ObjectDivergence>().get<Divergence>().get() ==
-            Approx(0.2));
+            0.2f);
     REQUIRE(blockFormat.get<JumpPosition>().get<JumpPositionFlag>() == true);
     REQUIRE(blockFormat.get<JumpPosition>().get<InterpolationLength>().get() ==
             std::chrono::milliseconds(20));
@@ -87,6 +99,9 @@ TEST_CASE("audio_block_format_objects") {
     REQUIRE(blockFormat.isDefault<AudioBlockFormatId>() == false);
     REQUIRE(blockFormat.isDefault<Rtime>() == false);
     REQUIRE(blockFormat.isDefault<Duration>() == false);
+    REQUIRE(blockFormat.isDefault<Lstart>() == false);
+    REQUIRE(blockFormat.isDefault<Lduration>() == false);
+    REQUIRE(blockFormat.isDefault<InitializeBlock>() == false);
     REQUIRE(blockFormat.isDefault<Cartesian>() == false);
     REQUIRE(blockFormat.isDefault<Width>() == false);
     REQUIRE(blockFormat.isDefault<Height>() == false);
@@ -101,6 +116,9 @@ TEST_CASE("audio_block_format_objects") {
 
     blockFormat.unset<Rtime>();
     blockFormat.unset<Duration>();
+    blockFormat.unset<Lstart>();
+    blockFormat.unset<Lduration>();
+    blockFormat.unset<InitializeBlock>();
     blockFormat.unset<Cartesian>();
     blockFormat.unset<Width>();
     blockFormat.unset<Height>();
@@ -116,6 +134,9 @@ TEST_CASE("audio_block_format_objects") {
     REQUIRE(blockFormat.isDefault<AudioBlockFormatId>() == false);
     REQUIRE(blockFormat.isDefault<Rtime>() == true);
     REQUIRE(blockFormat.isDefault<Duration>() == false);
+    REQUIRE(blockFormat.isDefault<Lstart>() == false);
+    REQUIRE(blockFormat.isDefault<Lduration>() == false);
+    REQUIRE(blockFormat.isDefault<InitializeBlock>() == false);
     REQUIRE(blockFormat.isDefault<Cartesian>() == true);
     REQUIRE(blockFormat.isDefault<Width>() == true);
     REQUIRE(blockFormat.isDefault<Height>() == true);

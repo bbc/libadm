@@ -1,5 +1,6 @@
 #pragma once
 #include "adm/elements.hpp"
+#include "adm/serialized_fwd.hpp"
 #include <string>
 
 namespace adm {
@@ -67,6 +68,11 @@ namespace adm {
                                 const ObjectDivergence &objectDivergence);
     void formatJumpPosition(XmlNode &node, const JumpPosition &jumpPosition);
 
+    void formatFrameHeader(XmlNode &node, const FrameHeader &header);
+    void formatFrameFormat(XmlNode &node, const FrameFormat &format);
+    void formatTransportTrackFormat(XmlNode &node,
+                                    const TransportTrackFormat &format);
+
     namespace detail {
       std::string toString(const std::string &string);
       std::string toString(const std::chrono::nanoseconds &time);
@@ -79,6 +85,8 @@ namespace adm {
       std::string toString(const AudioStreamFormatId &id);
       std::string toString(const AudioTrackFormatId &id);
       std::string toString(const AudioTrackUidId &id);
+      std::string toString(const FrameFormatId &id);
+      std::string toString(const TransportId &id);
 
       template <typename T, typename std::enable_if<
                                 std::is_integral<T>::value>::type * = nullptr>

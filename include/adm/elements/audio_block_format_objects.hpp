@@ -9,6 +9,7 @@
 #include "adm/elements/jump_position.hpp"
 #include "adm/elements/object_divergence.hpp"
 #include "adm/elements/position.hpp"
+#include "adm/elements/initialize_block.hpp"
 #include "adm/elements_fwd.hpp"
 #include "adm/detail/named_option_helper.hpp"
 #include "adm/detail/named_type.hpp"
@@ -112,7 +113,12 @@ namespace adm {
     ADM_EXPORT void set(Rtime rtime);
     /// @brief Duration setter
     ADM_EXPORT void set(Duration duration);
-
+    /// @brief lstart setter
+    ADM_EXPORT void set(Lstart lstart);
+    /// @brief Lduration setter
+    ADM_EXPORT void set(Lduration lduration);
+    /// @brief InitializeBlock setter
+    ADM_EXPORT void set(InitializeBlock initializeBlock);
     /**
      * @brief Cartesian setter
      *
@@ -183,6 +189,10 @@ namespace adm {
         get(detail::ParameterTraits<AudioBlockFormatId>::tag) const;
     ADM_EXPORT Rtime get(detail::ParameterTraits<Rtime>::tag) const;
     ADM_EXPORT Duration get(detail::ParameterTraits<Duration>::tag) const;
+    ADM_EXPORT Lstart get(detail::ParameterTraits<Lstart>::tag) const;
+    ADM_EXPORT Lduration get(detail::ParameterTraits<Lduration>::tag) const;
+    ADM_EXPORT InitializeBlock
+        get(detail::ParameterTraits<InitializeBlock>::tag) const;
     ADM_EXPORT Cartesian get(detail::ParameterTraits<Cartesian>::tag) const;
     ADM_EXPORT Position get(detail::ParameterTraits<Position>::tag) const;
     ADM_EXPORT SphericalPosition
@@ -207,6 +217,9 @@ namespace adm {
     ADM_EXPORT bool has(detail::ParameterTraits<AudioBlockFormatId>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<Rtime>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<Duration>::tag) const;
+    ADM_EXPORT bool has(detail::ParameterTraits<Lstart>::tag) const;
+    ADM_EXPORT bool has(detail::ParameterTraits<Lduration>::tag) const;
+    ADM_EXPORT bool has(detail::ParameterTraits<InitializeBlock>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<Cartesian>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<Position>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<SphericalPosition>::tag) const;
@@ -243,6 +256,9 @@ namespace adm {
 
     ADM_EXPORT void unset(detail::ParameterTraits<Rtime>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<Duration>::tag);
+    ADM_EXPORT void unset(detail::ParameterTraits<Lstart>::tag);
+    ADM_EXPORT void unset(detail::ParameterTraits<Lduration>::tag);
+    ADM_EXPORT void unset(detail::ParameterTraits<InitializeBlock>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<Cartesian>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<Position>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<SphericalPosition>::tag);
@@ -262,6 +278,9 @@ namespace adm {
     AudioBlockFormatId id_;
     boost::optional<Rtime> rtime_;
     boost::optional<Duration> duration_;
+    boost::optional<Lstart> lstart_;
+    boost::optional<Lduration> lduration_;
+    boost::optional<InitializeBlock> initializeBlock_;
     boost::optional<Cartesian> cartesian_;
     boost::optional<SphericalPosition> sphericalPosition_;
     boost::optional<CartesianPosition> cartesianPosition_;

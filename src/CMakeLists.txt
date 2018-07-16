@@ -14,6 +14,7 @@ add_custom_command(
 add_library(adm
   document.cpp
   errors.cpp
+  frame.cpp
   common_definitions.cpp
   elements/audio_programme.cpp
   elements/audio_content.cpp
@@ -51,6 +52,14 @@ add_library(adm
   elements/speaker_position.cpp
   elements/type_descriptor.cpp
   elements/format_descriptor.cpp
+  segmenter.cpp
+  combiner.cpp
+  serialized/audio_track.cpp
+  serialized/frame_format.cpp
+  serialized/frame_format_id.cpp
+  serialized/frame_header.cpp
+  serialized/transport_track_format.cpp
+  serialized/transport_track_format_id.cpp
   utilities/block_duration_assignment.cpp
   utilities/copy.cpp
   utilities/id_assignment.cpp
