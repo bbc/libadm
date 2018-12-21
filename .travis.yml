@@ -146,7 +146,6 @@ after_success:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" && "${CMAKE_BUILD_TYPE}" == "Coverage" ]]; then
       docker exec -t linux bash -c "cd /travis/build && codecov \
-        --dump \
         --token ${CODECOV_UPLOAD_TOKEN} \
         --branch ${TRAVIS_BRANCH} \
         --build ${TRAVIS_JOB_NUMBER} \
