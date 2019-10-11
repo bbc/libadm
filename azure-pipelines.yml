@@ -1,0 +1,230 @@
+# CppRestSdk Azure Pipelines Configuration
+
+jobs:
+  - job: Windows_VS2017_x86
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install boost --triplet x64-windows --vcpkg-root .\vcpkg
+      displayName: vcpkg install dependencies
+    - script: mkdir build.common
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.common'
+        cmakeArgs: '-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+    - script: |
+        cd build.common\Release\Binaries\Debug
+      displayName: 'Run tests, debug'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        configuration: 'Release'
+    - script: |
+        cd build.common\Release\Binaries\Release
+        .\test_runner.exe *test.dll
+      displayName: 'Run tests, release'
+  - job: Windows_VS2017_x64
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install zlib openssl boost-system boost-date-time boost-regex boost-interprocess websocketpp brotli --triplet x64-windows --vcpkg-root .\vcpkg
+      displayName: vcpkg install dependencies
+    - script: mkdir build.common
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.common'
+        cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DCPPREST_EXCLUDE_BROTLI=OFF ..'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x64'
+    - script: |
+        cd build.common\Release\Binaries\Debug
+      displayName: 'Run tests, debug'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x64'
+        configuration: 'Release'
+    - script: |
+        cd build.common\Release\Binaries\Release
+      displayName: 'Run tests, release'
+  - job: Windows_VS2017_UWP
+    pool:
+      vmImage: 'vs2017-win2016'
+    steps:
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install boost --triplet x64-windows --vcpkg-root .\vcpkg
+      displayName: vcpkg install dependencies
+    - script: mkdir build.common
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.common'
+        cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0 ..'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x64'
+  - job: Windows_VS2015_x86
+    pool:
+      vmImage: 'vs2015-win2012r2'
+    steps:
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install boost --triplet x64-windows --vcpkg-root .\vcpkg
+      displayName: vcpkg install dependencies
+    - script: mkdir build.common
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.common'
+        cmakeArgs: '-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+    - script: |
+        cd build.common\Release\Binaries\Debug
+        .\test_runner.exe *testd.dll
+      displayName: 'Run tests, debug'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        configuration: 'Release'
+    - script: |
+        cd build.common\Release\Binaries\Release
+        .\test_runner.exe *test.dll
+      displayName: 'Run tests, release'
+  - job: Windows_VS2015_x64
+    pool:
+      vmImage: 'vs2015-win2012r2'
+    steps:
+    - script: .\vcpkg\bootstrap-vcpkg.bat
+      displayName: Bootstrap vcpkg
+    - script: .\vcpkg\vcpkg.exe install boost --triplet x64-windows --vcpkg-root .\vcpkg
+      displayName: vcpkg install dependencies
+    - script: mkdir build.common
+      displayName: Make Build Directory
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.common'
+        cmakeArgs: '-A x64 -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DCPPREST_EXCLUDE_BROTLI=OFF ..'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x64'
+    - script: |
+        cd build.common\Release\Binaries\Debug
+        .\test_runner.exe *testd.dll
+      displayName: 'Run tests, debug'
+    - task: MSBuild@1
+      inputs:
+        solution: 'build.common/ALL_BUILD.vcxproj'
+        maximumCpuCount: true
+        platform: 'x64'
+        configuration: 'Release'
+    - script: |
+        cd build.common\Release\Binaries\Release
+        .\test_runner.exe *test.dll
+      displayName: 'Run tests, release'
+  - job: Ubuntu_1604_Apt
+    pool:
+      vmImage: 'Ubuntu 16.04'
+    steps:
+    - script: |
+        sudo apt install -y build-essential cmake ninja-build libboost-dev
+        mkdir build.debug
+        cd build.debug
+        /usr/local/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..
+        cd ..
+        mkdir build.release
+        cd build.release
+        /usr/local/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        cd ..
+        ninja -C build.debug
+        ninja -C build.release
+        cd build.debug/Release/Binaries
+        /usr/local/bin/ctest --output-on-failure
+        cd ../../../build.release/Release/Binaries
+        /usr/local/bin/ctest --output-on-failure
+      displayName: Run build
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.debug'
+        cmakeArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.release'
+        cmakeArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - script: |
+        cd build.debug
+        ninja
+      displayName: 'Run ninja debug'
+    - script: |
+        cd build.debug/Release/Binaries
+        ./test_runner *test.so
+      displayName: 'Run Tests debug'
+    - script: |
+        cd build.release
+        ninja
+      displayName: 'Run ninja, release'
+    - script: |
+        cd build.release/Release/Binaries
+        ./test_runner *test.so
+      displayName: 'Run tests, release'
+  - job: MacOS_Vcpkg
+    pool:
+      vmImage: 'macOS-10.14'
+    steps:
+    - script: |
+        brew install ninja-build
+        ./vcpkg/bootstrap-vcpkg.sh
+        ./vcpkg/vcpkg install boost --vcpkg-root ./vcpkg
+      displayName: Vcpkg install dependencies
+    - script: |
+        mkdir build.debug
+        mkdir build.release
+      displayName: Make Build Directories
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.debug'
+        cmakeArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - task: CMake@1
+      inputs:
+        workingDirectory: 'build.release'
+        cmakeArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake ..'
+    - script: |
+        cd build.debug
+        ninja
+      displayName: 'Run ninja debug'
+    - script: |
+        cd build.debug
+        ninja test
+      displayName: 'Run Tests debug'
+    - script: |
+        cd build.release
+        ninja
+      displayName: 'Run ninja, release'
+    - script: |
+        cd build.release
+        ninja test
+      displayName: 'Run tests, release'
+  
