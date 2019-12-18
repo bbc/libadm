@@ -1,0 +1,38 @@
+name: Coverage
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        build_shared_libs: [BUILD_SHARED_LIBS=True]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Checkout submodules
+      run: |
+        git submodule sync --recursive
+        git submodule update --init --recursive
+    - name: Install dependencies
+      run: sudo apt-get install -y build-essential cmake ninja-build libboost-dev
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G Ninja -DBUILD_SHARED_LIBS=True -DCMAKE_BUILD_TYPE=Coverage
+    - name: Build
+      run: |
+        cd build
+        cmake --build .
+    - name: Test
+      run: |
+        cd build
+        ctest --output-on-failure
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
