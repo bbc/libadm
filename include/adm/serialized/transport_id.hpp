@@ -78,6 +78,7 @@ namespace adm {
      * Compares the string representation of the TransportId.
      */
     ADM_EXPORT bool operator==(const TransportId& other) const;
+    ADM_EXPORT bool operator!=(const TransportId& other) const;
     ADM_EXPORT bool operator<(const TransportId& other) const;
     ///@}
 

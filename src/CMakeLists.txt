@@ -59,7 +59,7 @@ add_library(adm
   serialized/frame_format_id.cpp
   serialized/frame_header.cpp
   serialized/transport_track_format.cpp
-  serialized/transport_track_format_id.cpp
+  serialized/transport_id.cpp
   utilities/block_duration_assignment.cpp
   utilities/copy.cpp
   utilities/id_assignment.cpp

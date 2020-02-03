@@ -18,7 +18,7 @@ namespace adm {
   // ---- Has ---- //
   bool FrameFormatId::has(
       detail::ParameterTraits<FrameFormatIdValue>::tag) const {
-    return value_ != boost::none;
+    return true;
   }
 
   // ---- isDefault ---- //
@@ -40,25 +40,30 @@ namespace adm {
     return get<FrameFormatIdValue>() == other.get<FrameFormatIdValue>();
   }
 
+  bool FrameFormatId::operator!=(const FrameFormatId& other) const {
+    return !(*this == other);
+  }
+
   bool FrameFormatId::operator<(const FrameFormatId& other) const {
     return formatId(*this) < formatId(other);
   }
 
   // ---- Common ---- //
   void FrameFormatId::print(std::ostream& os) const {
-    os << boost::str(boost::format("FF_%1%") %
-                     detail::formatHexValue(get<FrameFormatIdValue>().get()));
+    os << boost::str(
+        boost::format("FF_%1%") %
+        detail::formatHexValue(get<FrameFormatIdValue>().get(), 11));
   }
 
   FrameFormatId parseFrameFormatId(const std::string& id) {
-    const std::regex r("FF_([0-9]{11})");
+    const std::regex r("FF_([0-9a-fA-F]{11})");
     std::smatch idMatch;
     if (std::regex_match(id, idMatch, r)) {
-      auto value = detail::parseHexValue(idMatch[1], 4);
+      auto value = detail::parseHexValue(idMatch[1], 11);
       return FrameFormatId(FrameFormatIdValue(value));
     } else {
       std::stringstream errorString;
-      errorString << "invalid FrameFormatId: " << id;
+      errorString << "invalid FrameFormatID: " << id;
       throw std::runtime_error(errorString.str());
     }
   }

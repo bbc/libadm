@@ -79,6 +79,7 @@ namespace adm {
      * Compares the string representation of the FrameFormatId.
      */
     ADM_EXPORT bool operator==(const FrameFormatId& other) const;
+    ADM_EXPORT bool operator!=(const FrameFormatId& other) const;
     ADM_EXPORT bool operator<(const FrameFormatId& other) const;
     ///@}
 

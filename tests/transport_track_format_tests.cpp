@@ -1,7 +1,6 @@
 #include <catch2/catch.hpp>
 #include "adm/serialized/frame_header.hpp"
 #include "adm/serialized/transport_track_format.hpp"
-#include "adm/serialized/transport_track_format_id.hpp"
 
 TEST_CASE("transport_track_format") {
   using namespace adm;

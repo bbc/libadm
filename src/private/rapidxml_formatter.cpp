@@ -288,6 +288,9 @@ namespace adm {
       node.addAttribute<AudioBlockFormatId>(&audioBlock, "audioBlockFormatID");
       node.addOptionalAttribute<Rtime>(&audioBlock, "rtime");
       node.addOptionalAttribute<Duration>(&audioBlock, "duration");
+      node.addOptionalAttribute<Lstart>(&audioBlock, "lstart");
+      node.addOptionalAttribute<Lduration>(&audioBlock, "lduration");
+      node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
       node.addMultiElement<SpeakerLabels>(&audioBlock, "speakerLabel", &formatSpeakerLabels);
       node.addMultiElement<SpeakerPosition>(&audioBlock, "position", &formatSpeakerPosition);
       // clang-format on
@@ -353,6 +356,7 @@ namespace adm {
       node.addAttribute<AudioBlockFormatId>(&audioBlock, "audioBlockFormatID");
       node.addOptionalAttribute<Rtime>(&audioBlock, "rtime");
       node.addOptionalAttribute<Duration>(&audioBlock, "duration");
+      node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
       // TODO: add missing matrix attributes and elements
       // clang-format on
     }
@@ -363,6 +367,9 @@ namespace adm {
       node.addAttribute<AudioBlockFormatId>(&audioBlock, "audioBlockFormatID");
       node.addOptionalAttribute<Rtime>(&audioBlock, "rtime");
       node.addOptionalAttribute<Duration>(&audioBlock, "duration");
+      node.addOptionalAttribute<Lstart>(&audioBlock, "lstart");
+      node.addOptionalAttribute<Lduration>(&audioBlock, "lduration");
+      node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
       node.addMultiElement<Position>(&audioBlock, "position", &formatPosition);
       node.addOptionalElement<Width>(&audioBlock, "width");
       node.addOptionalElement<Height>(&audioBlock, "height");
@@ -433,6 +440,9 @@ namespace adm {
       node.addAttribute<AudioBlockFormatId>(&audioBlock, "audioBlockFormatID");
       node.addOptionalAttribute<Rtime>(&audioBlock, "rtime");
       node.addOptionalAttribute<Duration>(&audioBlock, "duration");
+      node.addOptionalAttribute<Lstart>(&audioBlock, "lstart");
+      node.addOptionalAttribute<Lduration>(&audioBlock, "lduration");
+      node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
       // TODO: add missing hoa attributes and elements
       // clang-format on
     }
@@ -443,6 +453,9 @@ namespace adm {
       node.addAttribute<AudioBlockFormatId>(&audioBlock, "audioBlockFormatID");
       node.addOptionalAttribute<Rtime>(&audioBlock, "rtime");
       node.addOptionalAttribute<Duration>(&audioBlock, "duration");
+      node.addOptionalAttribute<Lstart>(&audioBlock, "lstart");
+      node.addOptionalAttribute<Lduration>(&audioBlock, "lduration");
+      node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
       // TODO: add missing binaural attributes and elements
       // clang-format on
     }
@@ -492,7 +505,7 @@ namespace adm {
     }
 
     void formatFrameFormat(XmlNode &node, const FrameFormat &format) {
-      node.addAttribute<FrameFormatId>(&format, "frameFormatId");
+      node.addAttribute<FrameFormatId>(&format, "frameFormatID");
       node.addAttribute<FrameStart>(&format, "frameStart");
       node.addAttribute<FrameDuration>(&format, "frameDuration");
       node.addAttribute<FrameType>(&format, "frameType");
@@ -505,13 +518,13 @@ namespace adm {
 
     void formatTransportTrackFormat(XmlNode &node,
                                     const TransportTrackFormat &format) {
-      node.addAttribute<TransportId>(&format, "transportId");
+      node.addAttribute<TransportId>(&format, "transportID");
       node.addOptionalAttribute<TransportName>(&format, "transportName");
       node.addOptionalAttribute<NumTracks>(&format, "numTracks");
-      node.addOptionalAttribute<NumIds>(&format, "numIds");
+      node.addOptionalAttribute<NumIds>(&format, "numIDs");
       for (const auto &audioTrack : format.audioTracks()) {
         auto trackNode = node.addNode("audioTrack");
-        trackNode.addAttribute<TrackId>(&audioTrack, "trackId");
+        trackNode.addAttribute<TrackId>(&audioTrack, "trackID");
         trackNode.addOptionalAttribute<FormatDescriptor>(
             &audioTrack, "formatLabel", &formatFormatLabel);
         trackNode.addOptionalAttribute<FormatDescriptor>(

@@ -8,6 +8,8 @@
 #include "adm/elements/audio_stream_format_id.hpp"
 #include "adm/elements/audio_track_format_id.hpp"
 #include "adm/elements/audio_track_uid_id.hpp"
+#include "adm/serialized/frame_format_id.hpp"
+#include "adm/serialized/transport_id.hpp"
 
 TEST_CASE("audio_programme_id") {
   using namespace adm;
@@ -318,4 +320,59 @@ TEST_CASE("audio_block_format_id") {
               .get<AudioBlockFormatIdValue>() == 10u);
 
   REQUIRE_THROWS(parseAudioBlockFormatId("AT_0001001"));
+}
+
+TEST_CASE("frame_format_id") {
+  using namespace adm;
+  FrameFormatId frameFormatId;
+
+  REQUIRE(frameFormatId.has<FrameFormatIdValue>() == true);
+  REQUIRE(frameFormatId.isDefault<FrameFormatIdValue>() == true);
+  frameFormatId.set(FrameFormatIdValue(1u));
+  REQUIRE(frameFormatId.isDefault<FrameFormatIdValue>() == false);
+  frameFormatId.unset<FrameFormatIdValue>();
+  REQUIRE(frameFormatId.isDefault<FrameFormatIdValue>() == true);
+
+  frameFormatId = parseFrameFormatId("FF_00000000001");
+  REQUIRE(frameFormatId.get<FrameFormatIdValue>() == 1u);
+  REQUIRE(formatId(frameFormatId) == "FF_00000000001");
+
+  REQUIRE(parseFrameFormatId("FF_00000000001") ==
+          parseFrameFormatId("FF_00000000001"));
+  REQUIRE(parseFrameFormatId("FF_00000000001") !=
+          parseFrameFormatId("FF_00000000002"));
+  REQUIRE(parseFrameFormatId("FF_00000000001") <
+          parseFrameFormatId("FF_00000000002"));
+
+  REQUIRE(parseFrameFormatId("FF_0000000000a").get<FrameFormatIdValue>() ==
+          10u);
+  REQUIRE(parseFrameFormatId("FF_0000000000A").get<FrameFormatIdValue>() ==
+          10u);
+
+  REQUIRE_THROWS(parseFrameFormatId("FF_0000000001"));
+}
+
+TEST_CASE("transport_track_format_id") {
+  using namespace adm;
+  TransportId transportId;
+
+  REQUIRE(transportId.has<TransportIdValue>() == true);
+  REQUIRE(transportId.isDefault<TransportIdValue>() == true);
+  transportId.set(TransportIdValue(1u));
+  REQUIRE(transportId.isDefault<TransportIdValue>() == false);
+  transportId.unset<TransportIdValue>();
+  REQUIRE(transportId.isDefault<TransportIdValue>() == true);
+
+  transportId = parseTransportId("TP_0001");
+  REQUIRE(transportId.get<TransportIdValue>() == 1u);
+  REQUIRE(formatId(transportId) == "TP_0001");
+
+  REQUIRE(parseTransportId("TP_0001") == parseTransportId("TP_0001"));
+  REQUIRE(parseTransportId("TP_0001") != parseTransportId("TP_0002"));
+  REQUIRE(parseTransportId("TP_0001") < parseTransportId("TP_0002"));
+
+  REQUIRE(parseTransportId("TP_000a").get<TransportIdValue>() == 10u);
+  REQUIRE(parseTransportId("TP_000A").get<TransportIdValue>() == 10u);
+
+  REQUIRE_THROWS(parseTransportId("TP_001"));
 }
