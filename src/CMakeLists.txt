@@ -60,6 +60,7 @@ add_library(adm
   serialized/frame_header.cpp
   serialized/transport_track_format.cpp
   serialized/transport_id.cpp
+  serialized/sadm_xml_parser.cpp
   utilities/block_duration_assignment.cpp
   utilities/copy.cpp
   utilities/id_assignment.cpp
@@ -75,6 +76,7 @@ add_library(adm
   detail/hex_values.cpp
   detail/id_assigner.cpp
   parse.cpp
+  parse_sadm.cpp
   write.cpp
   ${PROJECT_BINARY_DIR}/resources.hpp
 )

@@ -3,6 +3,7 @@
 #include <map>
 #include "adm/elements/type_descriptor.hpp"
 #include "adm/document.hpp"
+#include "adm/frame.hpp"
 #include "adm/export.h"
 
 namespace adm {
@@ -10,6 +11,9 @@ namespace adm {
   /// @brief Load embedded common definitions file and create Document
   ADM_EXPORT std::shared_ptr<Document> getCommonDefinitions();
 
+  /// @brief Load embedded common definitions file and create Frame
+  ADM_EXPORT std::shared_ptr<Frame> getSadmCommonDefinitions();
+   
   /// @brief Add embedded common definitions file to a Document
   ADM_EXPORT void addCommonDefinitionsTo(std::shared_ptr<Document> document);
 
