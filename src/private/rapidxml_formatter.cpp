@@ -494,6 +494,8 @@ namespace adm {
           trackUid, "audioTrackFormatIDRef");
       node.addOptionalReference<AudioPackFormat, AudioPackFormatId>(
           trackUid, "audioPackFormatIDRef");
+      node.addOptionalReference<AudioChannelFormat, AudioChannelFormatId>(
+          trackUid, "audioChannelFormatIDRef");
     }
 
     void formatFrameHeader(XmlNode &node, const FrameHeader &header) {
@@ -506,9 +508,9 @@ namespace adm {
 
     void formatFrameFormat(XmlNode &node, const FrameFormat &format) {
       node.addAttribute<FrameFormatId>(&format, "frameFormatID");
-      node.addAttribute<FrameStart>(&format, "frameStart");
-      node.addAttribute<FrameDuration>(&format, "frameDuration");
-      node.addAttribute<FrameType>(&format, "frameType");
+      node.addAttribute<FrameStart>(&format, "start");
+      node.addAttribute<FrameDuration>(&format, "duration");
+      node.addAttribute<FrameType>(&format, "type");
       node.addOptionalAttribute<TimeReference>(&format, "timeReference");
       node.addOptionalAttribute<CountToFull>(&format, "countToFull");
       node.addOptionalAttribute<NumSubFrame>(&format, "numSubFrame");

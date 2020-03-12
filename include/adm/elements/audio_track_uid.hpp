@@ -5,6 +5,7 @@
 #include <memory>
 #include "adm/elements/audio_pack_format.hpp"
 #include "adm/elements/audio_track_format.hpp"
+#include "adm/elements/audio_channel_format.hpp"
 #include "adm/elements/audio_track_uid_id.hpp"
 #include "adm/elements_fwd.hpp"
 #include "adm/detail/named_option_helper.hpp"
@@ -120,7 +121,13 @@ namespace adm {
      * A pending unresolved reference will be removed.
      */
     ADM_EXPORT void setReference(std::shared_ptr<AudioPackFormat> packFormat);
-
+    /**
+     * @brief Set reference to an AudioChannelFormat
+     *
+     * A pending unresolved reference will be removed.
+     */
+    ADM_EXPORT void setReference(std::shared_ptr<AudioChannelFormat> channelFormat);
+    
     template <typename Element>
     std::shared_ptr<const Element> getReference() const;
 
@@ -180,16 +187,22 @@ namespace adm {
         detail::ParameterTraits<AudioTrackFormat>::tag) const;
     ADM_EXPORT std::shared_ptr<const AudioPackFormat> getReference(
         detail::ParameterTraits<AudioPackFormat>::tag) const;
+    ADM_EXPORT std::shared_ptr<const AudioChannelFormat> getReference(
+        detail::ParameterTraits<AudioChannelFormat>::tag) const;
     ADM_EXPORT std::shared_ptr<AudioTrackFormat> getReference(
         detail::ParameterTraits<AudioTrackFormat>::tag);
     ADM_EXPORT std::shared_ptr<AudioPackFormat> getReference(
         detail::ParameterTraits<AudioPackFormat>::tag);
-
+    ADM_EXPORT std::shared_ptr<AudioChannelFormat> getReference(
+        detail::ParameterTraits<AudioChannelFormat>::tag);
+    
     ADM_EXPORT void removeReference(
         detail::ParameterTraits<AudioTrackFormat>::tag);
     ADM_EXPORT void removeReference(
         detail::ParameterTraits<AudioPackFormat>::tag);
-
+    ADM_EXPORT void removeReference(
+        detail::ParameterTraits<AudioChannelFormat>::tag);
+    
     ADM_EXPORT void disconnectReferences();
 
     ADM_EXPORT void setParent(std::weak_ptr<Document> document);
@@ -201,6 +214,7 @@ namespace adm {
 
     std::shared_ptr<AudioTrackFormat> audioTrackFormat_;
     std::shared_ptr<AudioPackFormat> audioPackFormat_;
+    std::shared_ptr<AudioChannelFormat> audioChannelFormat_;
   };
 
   // ---- Implementation ---- //

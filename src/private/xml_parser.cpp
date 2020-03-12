@@ -2,6 +2,7 @@
 #include "adm/common_definitions.hpp"
 #include "adm/private/xml_parser_helper.hpp"
 #include "adm/errors.hpp"
+//#include "adm/private/rapidxml_utils.hpp"
 
 namespace adm {
   namespace xml {
@@ -66,6 +67,7 @@ namespace adm {
         resolveReferences(objectTrackUidRefs_);
         resolveReference(trackUidTrackFormatRef_);
         resolveReference(trackUidPackFormatRef_);
+        resolveReference(trackUidChannelFormatRef_);
         resolveReferences(packFormatChannelFormatRefs_);
         resolveReferences(packFormatPackFormatRefs_);
         resolveReference(trackFormatStreamFormatRef_);
@@ -385,6 +387,7 @@ namespace adm {
 
       setOptionalReference<AudioTrackFormatId>(node, "audioTrackFormatIDRef", audioTrackUid, trackUidTrackFormatRef_, &parseAudioTrackFormatId);
       setOptionalReference<AudioPackFormatId>(node, "audioPackFormatIDRef", audioTrackUid, trackUidPackFormatRef_, &parseAudioPackFormatId);
+      setOptionalReference<AudioChannelFormatId>(node, "audioChannelFormatIDRef", audioTrackUid, trackUidChannelFormatRef_, &parseAudioChannelFormatId);
       // clang-format on
       return audioTrackUid;
     }

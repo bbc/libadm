@@ -12,6 +12,7 @@ namespace adm {
     std::map<std::shared_ptr<AudioObject>, std::vector<AudioTrackUidId>> objectTrackUidRefs;
     std::map<std::shared_ptr<AudioTrackUid>, AudioTrackFormatId> trackUidTrackFormatRef;
     std::map<std::shared_ptr<AudioTrackUid>, AudioPackFormatId> trackUidPackFormatRef;
+    std::map<std::shared_ptr<AudioTrackUid>, AudioChannelFormatId> trackUidChannelFormatRef;
     std::map<std::shared_ptr<AudioPackFormat>, std::vector<AudioChannelFormatId>> packFormatChannelFormatRefs;
     std::map<std::shared_ptr<AudioPackFormat>, std::vector<AudioPackFormatId>> packFormatPackFormatRefs;
     std::map<std::shared_ptr<AudioTrackFormat>, AudioStreamFormatId> trackFormatStreamFormatRef;
@@ -144,6 +145,10 @@ namespace adm {
           mapping.trackUidPackFormatRef[copiedElement] =
               packFormat->get<AudioPackFormatId>();
         }
+        if (auto channelFormat = element->getReference<AudioChannelFormat>()) {
+          mapping.trackUidChannelFormatRef[copiedElement] =
+              channelFormat->get<AudioChannelFormatId>();
+        }
       }
     }
     // resolve new elements
@@ -154,6 +159,7 @@ namespace adm {
     resolveReferences(mapping.objectTrackUidRefs);
     resolveReference(mapping.trackUidTrackFormatRef);
     resolveReference(mapping.trackUidPackFormatRef);
+    resolveReference(mapping.trackUidChannelFormatRef);
     resolveReferences(mapping.packFormatChannelFormatRefs);
     resolveReferences(mapping.packFormatPackFormatRefs);
     resolveReference(mapping.trackFormatStreamFormatRef);

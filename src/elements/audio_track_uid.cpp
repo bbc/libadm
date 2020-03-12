@@ -1,5 +1,6 @@
 #include "adm/document.hpp"
 #include "adm/elements/audio_track_format.hpp"
+#include "adm/elements/audio_channel_format.hpp"
 #include "adm/elements/private/parent_attorneys.hpp"
 #include "adm/elements/private/auto_parent.hpp"
 #include "adm/utilities/element_io.hpp"
@@ -75,7 +76,18 @@ namespace adm {
     }
     audioPackFormat_ = packFormat;
   }
-
+  
+  void AudioTrackUid::setReference(
+      std::shared_ptr<AudioChannelFormat> channelFormat) {
+    autoParent(shared_from_this(), channelFormat);
+    if (getParent().lock() != channelFormat->getParent().lock()) {
+      throw std::runtime_error(
+          "AudioTrackUid cannot refer to an AudioChannelFormat in a different "
+          "document");
+    }
+    audioChannelFormat_ = channelFormat;
+  }
+  
   std::shared_ptr<const AudioTrackFormat> AudioTrackUid::getReference(
       detail::ParameterTraits<AudioTrackFormat>::tag) const {
     return audioTrackFormat_;
@@ -86,6 +98,11 @@ namespace adm {
     return audioPackFormat_;
   }
 
+  std::shared_ptr<const AudioChannelFormat> AudioTrackUid::getReference(
+      detail::ParameterTraits<AudioChannelFormat>::tag) const {
+    return audioChannelFormat_;
+  }
+  
   std::shared_ptr<AudioTrackFormat> AudioTrackUid::getReference(
       detail::ParameterTraits<AudioTrackFormat>::tag) {
     return audioTrackFormat_;
@@ -96,9 +113,15 @@ namespace adm {
     return audioPackFormat_;
   }
 
+  std::shared_ptr<AudioChannelFormat> AudioTrackUid::getReference(
+      detail::ParameterTraits<AudioChannelFormat>::tag) {
+    return audioChannelFormat_;
+  }
+  
   void AudioTrackUid::disconnectReferences() {
     removeReference<AudioTrackFormat>();
     removeReference<AudioPackFormat>();
+    removeReference<AudioChannelFormat>();
   }
 
   void AudioTrackUid::removeReference(
@@ -111,6 +134,11 @@ namespace adm {
     audioPackFormat_ = nullptr;
   }
 
+  void AudioTrackUid::removeReference(
+      detail::ParameterTraits<AudioChannelFormat>::tag) {
+    audioChannelFormat_ = nullptr;
+  }
+  
   // ---- Common ---- //
   void AudioTrackUid::print(std::ostream& os) const {
     os << get<AudioTrackUidId>();

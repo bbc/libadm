@@ -151,6 +151,10 @@ namespace adm {
         if (subtrack && this->shouldRecurse(audioTrackUid, subtrack)) {
           trace(subtrack, admRoute);
         }
+        auto subchannel = audioTrackUid->getReference<AudioChannelFormat>();
+        if (subchannel && this->shouldRecurse(audioTrackUid, subtrack)) {
+          trace(subchannel, admRoute);
+        }
         if (this->isEndOfRoute(audioTrackUid)) {
           admRoutes_.push_back(admRoute);
         }

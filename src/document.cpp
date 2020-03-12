@@ -215,6 +215,10 @@ namespace adm {
       if (audioPackFormat) {
         add(audioPackFormat);
       }
+      auto audioChannelFormat = trackUid->getReference<AudioChannelFormat>();
+      if (audioChannelFormat) {
+        add(audioChannelFormat);
+      }
       return true;
     } else {
       return false;
