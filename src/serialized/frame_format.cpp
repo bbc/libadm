@@ -120,11 +120,11 @@ namespace adm {
   // ---- Common ---- //
   void FrameFormat::print(std::ostream& os) const {
     os << get<FrameFormatId>();
-    os << " (frameStart=" << formatTimecode(get<FrameStart>().get());
-    os << ", frameDuration=" << formatTimecode(get<FrameDuration>().get());
+    os << " (start=" << formatTimecode(get<FrameStart>().get());
+    os << ", duration=" << formatTimecode(get<FrameDuration>().get());
     os << ", timeReference=";
     os << get<TimeReference>().get();
-    os << ", frameType=";
+    os << ", type=";
     os << get<FrameType>().get();
     if (has<CountToFull>()) {
       os << ", countToFull=" << get<CountToFull>();
