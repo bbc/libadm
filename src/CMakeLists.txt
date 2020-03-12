@@ -70,6 +70,8 @@ add_library(adm
   private/rapidxml_formatter.cpp
   private/xml_writer.cpp
   private/xml_parser.cpp
+  private/xml_parser_helper.cpp
+  private/rapidxml_utils.cpp
   detail/hex_values.cpp
   detail/id_assigner.cpp
   parse.cpp

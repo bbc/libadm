@@ -40,7 +40,8 @@ namespace adm {
     /// @brief FrameHeader getter
     ADM_EXPORT const FrameHeader &frameHeader() const;
     ADM_EXPORT FrameHeader &frameHeader();
-
+    ADM_EXPORT void setFrameHeader(FrameHeader frameHeader);
+    
     /** @name Add Add ADM elements
      *
      * If the ADM element was already added to the Frame, it will not be

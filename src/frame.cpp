@@ -41,7 +41,9 @@ namespace adm {
 
   const FrameHeader& Frame::frameHeader() const { return frameHeader_; }
   FrameHeader& Frame::frameHeader() { return frameHeader_; }
+  void Frame::setFrameHeader(FrameHeader frameHeader) { frameHeader_ = frameHeader; }
 
+  
   // ---- add elements ---- //
   bool Frame::add(std::shared_ptr<AudioProgramme> programme) {
     return audioFormatExtended_->add(programme);

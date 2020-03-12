@@ -4,14 +4,24 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "adm/document.hpp"
+#include "adm/elements.hpp"
+#include "adm/errors.hpp"
+#include "adm/parse_sadm.hpp"
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
+
 #include "adm/serialized/frame_format.hpp"
 #include "adm/serialized/frame_format_id.hpp"
 #include "adm/serialized/transport_track_format.hpp"
-#include "adm/serialized/transport_track_format_id.hpp"
+#include "adm/serialized/transport_id.hpp"
 #include "adm/serialized/audio_track.hpp"
 #include "adm/frame.hpp"
+//#include "adm/private/xml_parser.hpp"
+//#include "adm/private/xml_parser_helper.hpp"
+
+
+#include <iostream>
 
 namespace adm {
   /**
@@ -25,32 +35,14 @@ namespace adm {
    */
   namespace xml {
     using NodePtr = rapidxml::xml_node<>*;
-
-    AudioObjectInteraction parseAudioObjectInteraction(NodePtr node);
-    GainInteractionRange parseGainInteractionRange(std::vector<NodePtr> nodes);
-    PositionInteractionRange parsePositionInteractionRange(
-        std::vector<NodePtr> nodes);
-    Frequency parseFrequency(std::vector<NodePtr> nodes);
-    DialogueId parseDialogueId(NodePtr node);
-    ContentKind parseContentKind(NodePtr node);
-    Cartesian guessCartesianFlag(NodePtr node);
-    SphericalPosition parseSphericalPosition(std::vector<NodePtr> nodes);
-    CartesianPosition parseCartesianPosition(std::vector<NodePtr> nodes);
-    LoudnessMetadata parseLoudnessMetadata(NodePtr node);
-    AudioProgrammeReferenceScreen parseAudioProgrammeReferenceScreen(
-        NodePtr node);
-    AudioBlockFormatObjects parseAudioBlockFormatObjects(NodePtr node);
-    ChannelLock parseChannelLock(NodePtr node);
-    ObjectDivergence parseObjectDivergence(NodePtr node);
-    JumpPosition parseJumpPosition(NodePtr node);
-    AudioBlockFormatDirectSpeakers parseAudioBlockFormatDirectSpeakers(
-        NodePtr node);
-    SpeakerPosition parseSpeakerPosition(std::vector<NodePtr> node);
-    SpeakerLabel parseSpeakerLabel(NodePtr node);
-
+    
     class SadmXmlParser {
      public:
-      SadmXmlParser(std::istream& stream);
+      SadmXmlParser(std::istream& stream,
+                    ParserOptions options = ParserOptions::none,
+                    std::shared_ptr<Frame> destFrame = Frame::create(FrameStart(std::chrono::milliseconds(0)),
+                               FrameDuration(std::chrono::milliseconds(1000)),
+                               FrameType("full")));
 
       std::shared_ptr<Frame> parse();
 
@@ -70,7 +62,8 @@ namespace adm {
 
       rapidxml::file<> xmlFile_;
       std::shared_ptr<Frame> frame_;
-
+      ParserOptions options_;
+      
       // clang-format off
       std::map<std::shared_ptr<AudioProgramme>, std::vector<AudioContentId>> programmeContentRefs_;
       std::map<std::shared_ptr<AudioContent>, std::vector<AudioObjectId>> contentObjectRefs_;
@@ -79,6 +72,7 @@ namespace adm {
       std::map<std::shared_ptr<AudioObject>, std::vector<AudioTrackUidId>> objectTrackUidRefs_;
       std::map<std::shared_ptr<AudioTrackUid>, AudioTrackFormatId> trackUidTrackFormatRef_;
       std::map<std::shared_ptr<AudioTrackUid>, AudioPackFormatId> trackUidPackFormatRef_;
+      std::map<std::shared_ptr<AudioTrackUid>, AudioChannelFormatId> trackUidChannelFormatRef_;
       std::map<std::shared_ptr<AudioPackFormat>, std::vector<AudioChannelFormatId>> packFormatChannelFormatRefs_;
       std::map<std::shared_ptr<AudioPackFormat>, std::vector<AudioPackFormatId>> packFormatPackFormatRefs_;
       std::map<std::shared_ptr<AudioTrackFormat>, AudioStreamFormatId> trackFormatStreamFormatRef_;
@@ -93,7 +87,10 @@ namespace adm {
       void resolveReferences(std::map<Src, std::vector<TargetId>> map) {
         for (auto entry : map) {
           for (auto id : entry.second) {
-            entry.first->addReference(frame_->lookup(id));
+            if (frame_->lookup(id) != nullptr) {
+              entry.first->addReference(frame_->lookup(id));
+            }
+            else std::runtime_error("ID not found");
           }
         }
       }
@@ -101,7 +98,12 @@ namespace adm {
       template <typename Src, typename Target>
       void resolveReference(std::map<Src, Target> map) {
         for (auto entry : map) {
-          entry.first->setReference(frame_->lookup(entry.second));
+          auto id = entry.second;
+          if (auto element = frame_->lookup(id)) {
+            entry.first->setReference(element);
+          } else {
+            std::runtime_error("ID not found");
+          }
         }
       }
     };

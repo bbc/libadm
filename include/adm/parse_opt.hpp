@@ -1,18 +1,16 @@
-/// @file parse.hpp
+/// @file parse_opt.hpp
 #pragma once
 #include <string>
 #include <memory>
 #include <iosfwd>
 #include "adm/detail/enum_bitmask.hpp"
 #include "adm/export.h"
-#include "adm/parse_opt.hpp"
 
 namespace adm {
 
   class Document;
 
   namespace xml {
-#if 0
     /**
      * @brief Representation of available options to influence the behaviour
      * of the XML parser.
@@ -36,40 +34,7 @@ namespace adm {
       recursive_node_search =
           0x1,  ///< recursively search whole xml for audioFormatExtended node
     };
-#endif
   }  // namespace xml
-
-  /**
-   * @addtogroup xml XML parsing and generation
-   * @brief XML parsing and generation
-   * @{
-   */
-
-  /**
-   * @brief Parse an XML representation of the Audio Definition Model
-   *
-   * Convenience wrapper for files using `parseXml(std::istream&)`
-   * @param filename XML file to read and parse
-   * @param options Options to influence the XML parser behaviour
-   */
-  ADM_EXPORT std::shared_ptr<Document> parseXml(
-      const std::string& filename,
-      xml::ParserOptions options = xml::ParserOptions::none);
-
-  /**
-   * @brief Parse an XML representation of the Audio Definition Model
-   *
-   * Parse adm data from an `std::istream`.
-   * @param stream input stream to parse XML data
-   * @param options Options to influence the XML parser behaviour
-   */
-  ADM_EXPORT std::shared_ptr<Document> parseXml(
-      std::istream& stream,
-      xml::ParserOptions options = xml::ParserOptions::none);
-  
-  /**
-   * @}
-   */
 }  // namespace adm
 
-//ENABLE_ENUM_BITMASK_OPERATORS(adm::xml::ParserOptions);
+ENABLE_ENUM_BITMASK_OPERATORS(adm::xml::ParserOptions);

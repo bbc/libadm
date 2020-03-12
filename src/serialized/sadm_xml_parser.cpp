@@ -1,12 +1,31 @@
-#include "adm/serialized/sadm_xml_parser.hpp"
+#include "adm/private/xml_parser.hpp"
 #include "adm/private/xml_parser_helper.hpp"
+#include "adm/serialized/sadm_xml_parser.hpp"
+#include "adm/common_definitions.hpp"
 #include "adm/errors.hpp"
+#include "adm/private/rapidxml_utils.hpp"
+#include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_utils.hpp"
+#include "adm/private/xml_parser.hpp"
 #include <iostream>
 
 namespace adm {
   namespace xml {
 
-    SadmXmlParser::SadmXmlParser(std::istream& stream) : xmlFile_(stream) {}
+    /// Check if a option/flag is set
+    /**
+     * Checks if the option @a flag is set within @a options.
+     *
+     * This is equivalent to an bitwise AND followed by a conversion to bool,
+     * but should improve readability.
+     */
+    /*inline bool isSet(ParserOptions options, ParserOptions flag) {
+      return static_cast<bool>(options & flag);
+    }*/
+    
+    SadmXmlParser::SadmXmlParser(std::istream& stream, ParserOptions options,
+                         std::shared_ptr<Frame> destFrame) 
+        : xmlFile_(stream), options_(options), frame_(destFrame) {}
 
     std::shared_ptr<Frame> SadmXmlParser::parse() {
       rapidxml::xml_document<> xmlDocument;
@@ -16,43 +35,57 @@ namespace adm {
         for (NodePtr node = root->first_node(); node;
              node = node->next_sibling()) {
           if (std::string(node->name()) == "frameHeader") {
-            frame_ = Frame::create(parseFrameHeader(node));
-          } else if (std::string(node->name()) == "audioFormatExtended") {
-            auto afe = node;
-            // add ADM elements to ADM document
-            for (NodePtr anode = afe->first_node(); anode;
-                 anode = anode->next_sibling()) {
-              if (std::string(anode->name()) == "audioProgramme") {
-                frame_->add(parseAudioProgramme(anode));
-              } else if (std::string(anode->name()) == "audioContent") {
-                frame_->add(parseAudioContent(anode));
-              } else if (std::string(anode->name()) == "audioObject") {
-                frame_->add(parseAudioObject(anode));
-              } else if (std::string(anode->name()) == "audioTrackUID") {
-                frame_->add(parseAudioTrackUid(anode));
-              } else if (std::string(anode->name()) == "audioPackFormat") {
-                frame_->add(parseAudioPackFormat(anode));
-              } else if (std::string(anode->name()) == "audioChannelFormat") {
-                frame_->add(parseAudioChannelFormat(anode));
-              } else if (std::string(anode->name()) == "audioStreamFormat") {
-                frame_->add(parseAudioStreamFormat(anode));
-              } else if (std::string(anode->name()) == "audioTrackFormat") {
-                frame_->add(parseAudioTrackFormat(anode));
-              }
+            if (frame_ != nullptr) {   // Don't overwrite existing frame
+              frame_->setFrameHeader(parseFrameHeader(node));
+            } else {
+              frame_ = Frame::create(parseFrameHeader(node));
             }
-            resolveReferences(programmeContentRefs_);
-            resolveReferences(contentObjectRefs_);
-            resolveReferences(objectObjectRefs_);
-            resolveReferences(objectPackFormatRefs_);
-            resolveReferences(objectTrackUidRefs_);
-            resolveReference(trackUidTrackFormatRef_);
-            resolveReference(trackUidPackFormatRef_);
-            resolveReferences(packFormatChannelFormatRefs_);
-            resolveReferences(packFormatPackFormatRefs_);
-            resolveReference(trackFormatStreamFormatRef_);
-            resolveReference(streamFormatChannelFormatRef_);
-            resolveReference(streamFormatPackFormatRef_);
-            resolveReferences(streamFormatTrackFormatRefs_);
+          } else {
+            NodePtr afe = nullptr;
+            //if (isSet(options_, ParserOptions::recursive_node_search)) {
+            if (true) {
+              afe = findAudioFormatExtendedNodeFullRecursive(node);
+            } else {
+              afe = findAudioFormatExtendedNodeEbuCore(node);
+            }
+            if (afe) {
+              // add ADM elements to ADM document
+              for (NodePtr anode = afe->first_node(); anode;
+                   anode = anode->next_sibling()) {
+                if (std::string(anode->name()) == "audioProgramme") {
+                  frame_->add(parseAudioProgramme(anode));
+                } else if (std::string(anode->name()) == "audioContent") {
+                  frame_->add(parseAudioContent(anode));
+                } else if (std::string(anode->name()) == "audioObject") {
+                  frame_->add(parseAudioObject(anode));
+                } else if (std::string(anode->name()) == "audioTrackUID") {
+                  frame_->add(parseAudioTrackUid(anode));
+                } else if (std::string(anode->name()) == "audioPackFormat") {
+                  frame_->add(parseAudioPackFormat(anode));
+                } else if (std::string(anode->name()) == "audioChannelFormat") {
+                  frame_->add(parseAudioChannelFormat(anode));
+                } else if (std::string(anode->name()) == "audioStreamFormat") {
+                  frame_->add(parseAudioStreamFormat(anode));
+                } else if (std::string(anode->name()) == "audioTrackFormat") {
+                  frame_->add(parseAudioTrackFormat(anode));
+                }
+              }
+                      
+              resolveReferences(programmeContentRefs_);
+              resolveReferences(contentObjectRefs_);
+              resolveReferences(objectObjectRefs_);
+              resolveReferences(objectPackFormatRefs_);
+              resolveReferences(objectTrackUidRefs_);
+              resolveReference(trackUidTrackFormatRef_);
+              resolveReference(trackUidPackFormatRef_);
+              resolveReference(trackUidChannelFormatRef_);
+              resolveReferences(packFormatChannelFormatRefs_);
+              resolveReferences(packFormatPackFormatRefs_);
+              resolveReference(trackFormatStreamFormatRef_);
+              resolveReference(streamFormatChannelFormatRef_);
+              resolveReference(streamFormatPackFormatRef_);
+              resolveReferences(streamFormatTrackFormatRefs_);
+            }
           }
         }
       } else {
@@ -61,6 +94,7 @@ namespace adm {
       return frame_;
     }  // namespace xml
 
+    
     /**
      * @brief Find the top level element 'frame'
      *
@@ -71,7 +105,8 @@ namespace adm {
      * @note: Only the first frame node will be found!
      */
     NodePtr SadmXmlParser::findFrameNode(NodePtr root) {
-      if (std::string(root->name()) == "frame") {
+      // ituADM is for common definitions reading
+      if (std::string(root->name()) == "frame" || std::string(root->name()) == "ituADM") {
         return root;
       } else {
         if (root->first_node()) {
@@ -86,9 +121,9 @@ namespace adm {
       // clang-format off
       auto element = detail::findElement(node, "frameFormat");
       FrameFormatId ff_id = parseAttribute<FrameFormatId>(element, "frameFormatID", &parseFrameFormatId);
-      FrameStart ff_start = parseAttribute<FrameStart>(element, "frameStart", &parseTimecode);
-      FrameDuration ff_duration = parseAttribute<FrameDuration>(element, "frameDuration", &parseTimecode);
-      FrameType ff_type = parseAttribute<FrameType>(element, "frameType");
+      FrameStart ff_start = parseAttribute<FrameStart>(element, "start", &parseTimecode);
+      FrameDuration ff_duration = parseAttribute<FrameDuration>(element, "duration", &parseTimecode);
+      FrameType ff_type = parseAttribute<FrameType>(element, "type");
 
       FrameHeader frameHeader(ff_start, ff_duration, ff_type);
       frameHeader.frameFormat().set(ff_id);
@@ -182,69 +217,7 @@ namespace adm {
       return audioObject;
     }
 
-    AudioObjectInteraction parseAudioObjectInteraction(NodePtr node) {
-      // clang-format off
-      auto onOffInteract = parseAttribute<OnOffInteract>(node, "onOffInteract");
-      AudioObjectInteraction objectInteraction(onOffInteract);
-      setOptionalAttribute<GainInteract>(node, "gainInteract", objectInteraction);
-      setOptionalAttribute<PositionInteract>(node, "positionInteract", objectInteraction);
-      setOptionalMultiElement<GainInteractionRange>(node, "gainInteractionRange", objectInteraction, &parseGainInteractionRange);
-      setOptionalMultiElement<PositionInteractionRange>(node, "positionInteractionRange", objectInteraction, &parsePositionInteractionRange);
-      // clang-format on
-      return objectInteraction;
-    }
-
-    GainInteractionRange parseGainInteractionRange(std::vector<NodePtr> nodes) {
-      GainInteractionRange gainInteraction;
-      for (auto& element : nodes) {
-        auto bound =
-            parseAttribute<GainInteractionBoundValue>(element, "bound");
-        if (bound.get() == "min") {
-          setValue<GainInteractionMin>(element, gainInteraction);
-        } else if (bound.get() == "max") {
-          setValue<GainInteractionMax>(element, gainInteraction);
-        }
-      }
-      return gainInteraction;
-    }
-
-    PositionInteractionRange parsePositionInteractionRange(
-        std::vector<NodePtr> nodes) {
-      PositionInteractionRange positionInteraction;
-      for (auto& element : nodes) {
-        auto bound =
-            parseAttribute<PositionInteractionBoundValue>(element, "bound");
-        auto coordinate =
-            parseAttribute<CoordinateInteractionValue>(element, "coordinate");
-        if (coordinate.get() == "azimuth" && bound.get() == "min") {
-          setValue<AzimuthInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "azimuth" && bound.get() == "max") {
-          setValue<AzimuthInteractionMax>(element, positionInteraction);
-        } else if (coordinate.get() == "elevation" && bound.get() == "min") {
-          setValue<ElevationInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "elevation" && bound.get() == "max") {
-          setValue<ElevationInteractionMax>(element, positionInteraction);
-        } else if (coordinate.get() == "distance" && bound.get() == "min") {
-          setValue<DistanceInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "distance" && bound.get() == "max") {
-          setValue<DistanceInteractionMax>(element, positionInteraction);
-        } else if (coordinate.get() == "X" && bound.get() == "min") {
-          setValue<XInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "X" && bound.get() == "max") {
-          setValue<XInteractionMax>(element, positionInteraction);
-        } else if (coordinate.get() == "Y" && bound.get() == "min") {
-          setValue<YInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "Y" && bound.get() == "max") {
-          setValue<YInteractionMax>(element, positionInteraction);
-        } else if (coordinate.get() == "Z" && bound.get() == "min") {
-          setValue<ZInteractionMin>(element, positionInteraction);
-        } else if (coordinate.get() == "Z" && bound.get() == "max") {
-          setValue<ZInteractionMax>(element, positionInteraction);
-        }
-      }
-      return positionInteraction;
-    }
-
+    
     std::shared_ptr<AudioPackFormat> SadmXmlParser::parseAudioPackFormat(
         NodePtr node) {
       // clang-format off
@@ -368,220 +341,13 @@ namespace adm {
 
       setOptionalAttribute<SampleRate>(node, "sampleRate", audioTrackUid);
       setOptionalAttribute<BitDepth>(node, "bitDepth", audioTrackUid);
-
+      
       setOptionalReference<AudioTrackFormatId>(node, "audioTrackFormatIDRef", audioTrackUid, trackUidTrackFormatRef_, &parseAudioTrackFormatId);
       setOptionalReference<AudioPackFormatId>(node, "audioPackFormatIDRef", audioTrackUid, trackUidPackFormatRef_, &parseAudioPackFormatId);
+      setOptionalReference<AudioChannelFormatId>(node, "audioChannelFormatIDRef", audioTrackUid, trackUidChannelFormatRef_, &parseAudioChannelFormatId);
+              
       // clang-format on
       return audioTrackUid;
     }
-
-    AudioBlockFormatDirectSpeakers parseAudioBlockFormatDirectSpeakers(
-        NodePtr node) {
-      AudioBlockFormatDirectSpeakers audioBlockFormat;
-      // clang-format off
-      setOptionalAttribute<AudioBlockFormatId>(node, "audioBlockFormatID", audioBlockFormat, &parseAudioBlockFormatId);
-      setOptionalAttribute<Rtime>(node, "rtime", audioBlockFormat, &parseTimecode);
-      setOptionalAttribute<Duration>(node, "duration", audioBlockFormat, &parseTimecode);
-      setMultiElement<SpeakerPosition>(node, "position", audioBlockFormat, &parseSpeakerPosition);
-      addOptionalElements<SpeakerLabel>(node, "speakerLabel", audioBlockFormat, &parseSpeakerLabel);
-      // clang-format on
-      return audioBlockFormat;
-    }
-
-    SpeakerPosition parseSpeakerPosition(std::vector<NodePtr> nodes) {
-      SpeakerPosition speakerPosition;
-      ScreenEdgeLock screenEdgeLock;
-      for (auto& element : nodes) {
-        auto axe =
-            parseAttribute<SphericalCoordinateValue>(element, "coordinate");
-        auto bound = parseOptionalAttribute<BoundValue>(element, "bound");
-        if (axe == "azimuth") {
-          if (bound == boost::none) {
-            setValue<Azimuth>(element, speakerPosition);
-            setOptionalAttribute<HorizontalEdge>(element, "screenEdgeLock",
-                                                 screenEdgeLock);
-          } else if (bound.get() == "min") {
-            setValue<AzimuthMin>(element, speakerPosition);
-          } else if (bound.get() == "max") {
-            setValue<AzimuthMax>(element, speakerPosition);
-          }
-        } else if (axe == "elevation") {
-          if (bound == boost::none) {
-            setValue<Elevation>(element, speakerPosition);
-            setOptionalAttribute<VerticalEdge>(element, "screenEdgeLock",
-                                               screenEdgeLock);
-          } else if (bound.get() == "min") {
-            setValue<ElevationMin>(element, speakerPosition);
-          } else if (bound.get() == "max") {
-            setValue<ElevationMax>(element, speakerPosition);
-          }
-        } else if (axe == "distance") {
-          if (bound == boost::none) {
-            setValue<Distance>(element, speakerPosition);
-          } else if (bound.get() == "min") {
-            setValue<DistanceMin>(element, speakerPosition);
-          } else if (bound.get() == "max") {
-            setValue<DistanceMax>(element, speakerPosition);
-          }
-        }
-      }
-      speakerPosition.set(screenEdgeLock);
-      return speakerPosition;
-    }
-
-    SpeakerLabel parseSpeakerLabel(NodePtr node) {
-      return SpeakerLabel(node->value());
-    }
-
-    AudioBlockFormatObjects parseAudioBlockFormatObjects(NodePtr node) {
-      AudioBlockFormatObjects audioBlockFormat{SphericalPosition()};
-      // clang-format off
-      setOptionalAttribute<AudioBlockFormatId>(node, "audioBlockFormatID", audioBlockFormat, &parseAudioBlockFormatId);
-      setOptionalAttribute<Rtime>(node, "rtime", audioBlockFormat, &parseTimecode);
-      setOptionalAttribute<Duration>(node, "duration", audioBlockFormat, &parseTimecode);
-
-      setOptionalElement<Cartesian>(node, "cartesian", audioBlockFormat);
-      auto cartesianGuess = guessCartesianFlag(node);
-      if(audioBlockFormat.get<Cartesian>() != cartesianGuess) {
-        audioBlockFormat.set(cartesianGuess);
-      }
-      if(audioBlockFormat.get<Cartesian>() == false) {
-        setMultiElement<SphericalPosition>(node, "position", audioBlockFormat, &parseSphericalPosition);
-      } else {
-        setMultiElement<CartesianPosition>(node, "position", audioBlockFormat, &parseCartesianPosition);
-      }
-      setOptionalElement<Width>(node, "width", audioBlockFormat);
-      setOptionalElement<Height>(node, "height", audioBlockFormat);
-      setOptionalElement<Depth>(node, "depth", audioBlockFormat);
-      setOptionalElement<Gain>(node, "gain", audioBlockFormat);
-      setOptionalElement<Diffuse>(node, "diffuse", audioBlockFormat);
-      setOptionalElement<ChannelLock>(node, "channelLock", audioBlockFormat, &parseChannelLock);
-      setOptionalElement<ObjectDivergence>(node, "objectDivergence", audioBlockFormat, &parseObjectDivergence);
-      setOptionalElement<JumpPosition>(node, "jumpPosition", audioBlockFormat, &parseJumpPosition);
-      setOptionalElement<ScreenRef>(node, "screenRef", audioBlockFormat);
-      setOptionalElement<Importance>(node, "importance", audioBlockFormat);
-      // clang-format on
-      return audioBlockFormat;
-    }
-
-    ChannelLock parseChannelLock(NodePtr node) {
-      ChannelLock channelLock;
-      setValue<ChannelLockFlag>(node, channelLock);
-      setOptionalAttribute<MaxDistance>(node, "maxDistance", channelLock);
-      return channelLock;
-    }
-
-    ObjectDivergence parseObjectDivergence(NodePtr node) {
-      ObjectDivergence objectDivergence;
-      setValue<Divergence>(node, objectDivergence);
-      setOptionalAttribute<AzimuthRange>(node, "azimuthRange",
-                                         objectDivergence);
-      setOptionalAttribute<PositionRange>(node, "positionRange",
-                                          objectDivergence);
-      return objectDivergence;
-    }
-
-    Frequency parseFrequency(std::vector<NodePtr> nodes) {
-      Frequency frequency;
-      for (auto& element : nodes) {
-        auto type = parseAttribute<FrequencyType>(element, "typeDefinition");
-        if (type == "lowPass") {
-          setValue<LowPass>(element, frequency);
-        } else if (type == "highpass") {
-          setValue<HighPass>(element, frequency);
-        }
-      }
-      return frequency;
-    }
-
-    Cartesian guessCartesianFlag(NodePtr node) {
-      auto element = detail::findElement(node, "position");
-      if (element) {
-        auto coordinate = element->first_attribute("coordinate");
-        if (coordinate) {
-          auto coordinateStr = std::string(coordinate->value());
-          if (coordinateStr == "X" || coordinateStr == "Y" ||
-              coordinateStr == "Z")
-            return Cartesian(true);
-        }
-      }
-      return Cartesian(false);
-    }
-
-    SphericalPosition parseSphericalPosition(std::vector<NodePtr> nodes) {
-      SphericalPosition position;
-      ScreenEdgeLock screenEdgeLock;
-      for (auto& element : nodes) {
-        auto axe =
-            parseAttribute<SphericalCoordinateValue>(element, "coordinate");
-        if (axe == "azimuth") {
-          setValue<Azimuth>(element, position);
-          setOptionalAttribute<HorizontalEdge>(element, "screenEdgeLock",
-                                               screenEdgeLock);
-        } else if (axe == "elevation") {
-          setValue<Elevation>(element, position);
-          setOptionalAttribute<VerticalEdge>(element, "screenEdgeLock",
-                                             screenEdgeLock);
-        } else if (axe == "distance") {
-          setValue<Distance>(element, position);
-        }
-      }
-      position.set(screenEdgeLock);
-      return position;
-    }
-
-    CartesianPosition parseCartesianPosition(std::vector<NodePtr> nodes) {
-      CartesianPosition position;
-      for (auto& element : nodes) {
-        auto axe =
-            parseAttribute<CartesianCoordinateValue>(element, "coordinate");
-        if (axe == "X") {
-          setValue<X>(element, position);
-        } else if (axe == "Y") {
-          setValue<Y>(element, position);
-        } else if (axe == "Z") {
-          setValue<Z>(element, position);
-        }
-      }
-      return position;
-    }
-
-    JumpPosition parseJumpPosition(NodePtr node) {
-      JumpPosition jumpPosition;
-      setValue<JumpPositionFlag>(node, jumpPosition);
-      setOptionalAttribute<InterpolationLength>(
-          node, "interpolationLength", jumpPosition, &parseInterpolationLength);
-      return jumpPosition;
-    }
-
-    LoudnessMetadata parseLoudnessMetadata(NodePtr /* node */) {
-      return LoudnessMetadata();
-    }
-
-    DialogueId parseDialogueId(NodePtr node) {
-      return DialogueId(std::stoi(node->value()));
-    }
-
-    ContentKind parseContentKind(NodePtr node) {
-      auto dialogueId = parseDialogueId(node);
-      if (dialogueId == Dialogue::NON_DIALOGUE) {
-        return ContentKind(parseAttribute<NonDialogueContentKind>(
-            node, "nonDialogueContentKind"));
-      } else if (dialogueId == Dialogue::DIALOGUE) {
-        return ContentKind(
-            parseAttribute<DialogueContentKind>(node, "dialogueContentKind"));
-      } else if (dialogueId == Dialogue::MIXED) {
-        return ContentKind(
-            parseAttribute<MixedContentKind>(node, "mixedContentKind"));
-      } else {
-        throw std::runtime_error("unknown dialogue id");
-      }
-    }
-
-    AudioProgrammeReferenceScreen parseAudioProgrammeReferenceScreen(
-        NodePtr /* node */) {
-      return AudioProgrammeReferenceScreen();
-    }
-
   }  // namespace xml
 }  // namespace adm
