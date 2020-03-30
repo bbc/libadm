@@ -46,6 +46,7 @@ namespace adm {
     ADM_EXPORT FrameFormat& frameFormat();
 
     ADM_EXPORT void add(const TransportTrackFormat& transportTrackFormat);
+    ADM_EXPORT void add(const FrameFormat& frameFormat);
 
     ADM_EXPORT TransportTrackFormatConstRange transportTrackFormats() const;
     ADM_EXPORT TransportTrackFormatRange transportTrackFormats();

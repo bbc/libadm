@@ -15,6 +15,7 @@
 #include "adm/elements/audio_track_format.hpp"
 #include "adm/elements/audio_track_uid.hpp"
 #include "adm/serialized/frame_format_id.hpp"
+//#include "adm/serialized/flow_id.hpp"
 #include "adm/detail/named_type.hpp"
 #include "adm/detail/named_type_validators.hpp"
 #include "adm/detail/named_option_helper.hpp"
@@ -24,6 +25,11 @@ namespace adm {
 
   class FrameHeader;
 
+  /// @brief Tag for FlowId
+  struct FlowIdTag {};
+  /// @brief NamedType for the FlowId attribute
+  using FlowId = detail::NamedType<std::string, FlowIdTag>;
+  
   /// @brief Tag for NamedType ::TimeReference
   struct TimeReferenceTag {};
   /// @brief NamedType for the TimeReference attribute
@@ -37,7 +43,8 @@ namespace adm {
   /// @brief Tag for NamedType ::CountToFull
   struct CountToFullTag {};
   /// @brief NamedType for the CountToFull attribute
-  using CountToFull = detail::NamedType<unsigned int, CountToFullTag>;
+  using CountToFull = detail::NamedType<unsigned int, CountToFullTag,
+                                        detail::DefaultValidator>;
   /// @brief Tag for NamedType ::NumSubFrame
   struct NumSubFrameTag {};
   /// @brief NamedType for the NumSubFrame attribute
@@ -124,6 +131,8 @@ namespace adm {
     ADM_EXPORT void set(FrameDuration duration);
     /// @brief TimeReference setter
     ADM_EXPORT void set(TimeReference timeReference);
+    /// @brief FlowId setter
+    ADM_EXPORT void set(FlowId id);
     /// @brief FrameType setter
     ADM_EXPORT void set(FrameType frameType);
     /// @brief CountToFull setter
@@ -158,6 +167,7 @@ namespace adm {
         get(detail::ParameterTraits<FrameDuration>::tag) const;
     ADM_EXPORT TimeReference
         get(detail::ParameterTraits<TimeReference>::tag) const;
+    ADM_EXPORT FlowId get(detail::ParameterTraits<FlowId>::tag) const;
     ADM_EXPORT FrameType get(detail::ParameterTraits<FrameType>::tag) const;
     ADM_EXPORT CountToFull get(detail::ParameterTraits<CountToFull>::tag) const;
     ADM_EXPORT NumSubFrame get(detail::ParameterTraits<NumSubFrame>::tag) const;
@@ -168,6 +178,7 @@ namespace adm {
     ADM_EXPORT bool has(detail::ParameterTraits<FrameStart>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<FrameDuration>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<TimeReference>::tag) const;
+    ADM_EXPORT bool has(detail::ParameterTraits<FlowId>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<FrameType>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<CountToFull>::tag) const;
     ADM_EXPORT bool has(detail::ParameterTraits<NumSubFrame>::tag) const;
@@ -175,6 +186,7 @@ namespace adm {
     ADM_EXPORT bool has(detail::ParameterTraits<FrameShift>::tag) const;
 
     ADM_EXPORT void unset(detail::ParameterTraits<TimeReference>::tag);
+    ADM_EXPORT void unset(detail::ParameterTraits<FlowId>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<CountToFull>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<NumSubFrame>::tag);
     ADM_EXPORT void unset(detail::ParameterTraits<FrameSkip>::tag);
@@ -192,6 +204,7 @@ namespace adm {
     FrameDuration duration_;
     FrameType frameType_;
     boost::optional<TimeReference> timeReference_;
+    boost::optional<FlowId> flowId_;
     boost::optional<CountToFull> countToFull_;
     boost::optional<NumSubFrame> numSubFrame_;
     boost::optional<FrameSkip> frameSkip_;

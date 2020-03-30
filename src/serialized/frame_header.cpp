@@ -15,6 +15,10 @@ namespace adm {
     transportTrackFormats_.push_back(transportTrackFormat);
   }
 
+  void FrameHeader::add(const FrameFormat& frameFormat) {
+    frameFormat_ = frameFormat;
+  }
+  
   TransportTrackFormatConstRange FrameHeader::transportTrackFormats() const {
     return boost::make_iterator_range(transportTrackFormats_.cbegin(),
                                       transportTrackFormats_.cend());

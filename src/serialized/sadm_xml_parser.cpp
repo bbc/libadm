@@ -124,10 +124,15 @@ namespace adm {
       FrameStart ff_start = parseAttribute<FrameStart>(element, "start", &parseTimecode);
       FrameDuration ff_duration = parseAttribute<FrameDuration>(element, "duration", &parseTimecode);
       FrameType ff_type = parseAttribute<FrameType>(element, "type");
-
+        
       FrameHeader frameHeader(ff_start, ff_duration, ff_type);
-      frameHeader.frameFormat().set(ff_id);
-      
+      FrameFormat frameFormat = frameHeader.frameFormat();
+      frameFormat.set(ff_id);
+      setOptionalAttribute<CountToFull>(element, "countToFull", frameFormat);
+      setOptionalAttribute<FlowId>(element, "flowID", frameFormat);
+
+      frameHeader.add(frameFormat);
+  
       auto elements = detail::findElements(node, "transportTrackFormat");
       for (auto el : elements) {
         TransportTrackFormat transportTrackFormat;

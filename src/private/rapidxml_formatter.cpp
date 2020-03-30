@@ -512,6 +512,7 @@ namespace adm {
       node.addAttribute<FrameDuration>(&format, "duration");
       node.addAttribute<FrameType>(&format, "type");
       node.addOptionalAttribute<TimeReference>(&format, "timeReference");
+      node.addOptionalAttribute<FlowId>(&format, "flowID");
       node.addOptionalAttribute<CountToFull>(&format, "countToFull");
       node.addOptionalAttribute<NumSubFrame>(&format, "numSubFrame");
       node.addOptionalAttribute<FrameSkip>(&format, "frameSkip");
