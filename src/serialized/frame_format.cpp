@@ -65,7 +65,7 @@ namespace adm {
     return timeReference_ != boost::none;
   }
   bool FrameFormat::has(detail::ParameterTraits<FlowId>::tag) const {
-    return true;
+    return flowId_ != boost::none;
   }
   bool FrameFormat::has(detail::ParameterTraits<CountToFull>::tag) const {
     return countToFull_ != boost::none;
