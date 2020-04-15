@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
   std::stringstream xmlStream;
   Segmenter segmenter(document);
   SegmentStart segment_start(std::chrono::milliseconds(0));
-  SegmentDuration segment_size(std::chrono::milliseconds(1));
+  SegmentDuration segment_size(std::chrono::milliseconds{size});
   while (segment_start < filelength) {
     auto frame = segmenter.getFrame(segment_start, segment_size);
     writeXml(xmlStream, frame);
