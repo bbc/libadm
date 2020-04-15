@@ -22,7 +22,13 @@ namespace adm {
   }
 
   std::shared_ptr<Frame> Frame::create(FrameHeader frameHeader) {
-    return std::shared_ptr<Frame>(new Frame(frameHeader));
+    auto frame = std::shared_ptr<Frame>(new Frame(frameHeader));
+    
+    // Generate the ATU_00000000 audioTrackUID and add to frame
+    auto audioTrackUid_zero = AudioTrackUid::create(AudioTrackUidIdValue(0));
+    frame->add(audioTrackUid_zero);
+    
+    return frame;
   }
 
   FrameStart Frame::start() const {

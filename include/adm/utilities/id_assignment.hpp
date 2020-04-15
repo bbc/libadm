@@ -54,7 +54,10 @@ namespace adm {
     return (0x0001u <= id.get<AudioObjectIdValue>().get() &&
             id.get<AudioObjectIdValue>().get() <= 0xfffu);
   }
-  inline bool isCommonDefinitionsId(AudioTrackUidId /*id*/) { return false; }
+  inline bool isCommonDefinitionsId(AudioTrackUidId id) {
+    // This is to class ATU_00000000 as a 'common definition', so it doesn't get included
+    return (0x0u == id.get<AudioTrackUidIdValue>().get()); 
+  }
   inline bool isCommonDefinitionsId(AudioPackFormatId id) {
     return (0x0001u <= id.get<AudioPackFormatIdValue>().get() &&
             id.get<AudioPackFormatIdValue>().get() <= 0xfffu);

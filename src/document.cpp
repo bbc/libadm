@@ -12,7 +12,13 @@ namespace adm {
   Document::Document() { idAssigner_.document(this); }
 
   std::shared_ptr<Document> Document::create() {
-    return std::shared_ptr<Document>(new Document());
+    auto document = std::shared_ptr<Document>(new Document());
+    
+    // Generate the ATU_00000000 audioTrackUID and add to document
+    auto audioTrackUid_zero = AudioTrackUid::create(AudioTrackUidIdValue(0));
+    document->add(audioTrackUid_zero);
+    
+    return document;
   }
 
   std::shared_ptr<Document> Document::deepCopy() const {
