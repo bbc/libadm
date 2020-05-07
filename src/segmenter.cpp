@@ -98,7 +98,6 @@ namespace adm {
                  TypeDefinition::OBJECTS) {
         addItemToChannelFormat<AudioBlockFormatObjects>(
             item, segStart, segDuration, channelFormatDest);
-
       } else if (channelFormatDest->get<TypeDescriptor>() ==
                  TypeDefinition::HOA) {
         addItemToChannelFormat<AudioBlockFormatHoa>(item, segStart, segDuration,
@@ -112,4 +111,71 @@ namespace adm {
     return baseFrame_;
   }
 
+
+  TransportTrackFormat Segmenter::generateTransportTrackFormat(
+                                   std::shared_ptr<bw64::ChnaChunk> chnaChunk,
+                                   SegmentStart segStart,
+                                   SegmentDuration segDuration) {
+    auto transportTrackFormat = TransportTrackFormat();
+    transportTrackFormat.set(TransportId(TransportIdValue(1)));  // Assuming only one set
+
+    std::vector<AudioTrack> audioTracks; // Vector of audioTracks to build up
+
+    for (int i = 0; i < chnaChunk->numUids(); i++) {
+      auto track_id = TrackId(chnaChunk->audioIds()[i].trackIndex());
+      bool exists = false;
+      for (auto &audioTrack : audioTracks) {
+        if (audioTrack.get<TrackId>() == track_id) {
+          auto audioTrackUidId = parseAudioTrackUidId(chnaChunk->audioIds()[i].uid());
+          bool present = checkAudioObjectTimes(audioTrackUidId, segStart, segDuration);
+          if (present) {
+            audioTrack.add(audioTrackUidId);
+          }
+          exists = true; 
+        }
+      }
+      if (!exists) {
+        AudioTrack audioTrack(track_id);
+        auto audioTrackUidId = parseAudioTrackUidId(chnaChunk->audioIds()[i].uid());
+        bool present = checkAudioObjectTimes(audioTrackUidId, segStart, segDuration);
+        if (present) {
+          audioTrack.add(audioTrackUidId);
+          audioTracks.push_back(audioTrack);
+        }
+      }
+    }
+    for (auto audioTrack : audioTracks) {
+      transportTrackFormat.add(audioTrack);
+    }
+
+    return transportTrackFormat;
+  }
+  
+  
+  bool Segmenter::checkAudioObjectTimes(AudioTrackUidId audioTrackUidId_ref,
+                                        SegmentStart segStart,
+                                        SegmentDuration segDuration) {
+    // Checks if the audioTrackUids in audioObjects are within the time for the segment
+    bool present = true;
+    for (auto audioObject : document_->getElements<AudioObject>()) {
+      for (auto& audioTrackUid : audioObject->getReferences<AudioTrackUid>()) {
+        if (audioTrackUidId_ref == audioTrackUid->get<AudioTrackUidId>()) {
+          if (audioObject->has<Start>()) {
+            auto start = audioObject->get<Start>();
+            if (start.get() > segStart.get() + segDuration.get()) {
+              present = false;
+            }
+            if (audioObject->has<Duration>()) {
+              auto duration = audioObject->get<Duration>();
+              if (start.get() + duration.get() <= segStart.get()) {
+                present = false;
+              }
+            }
+          }
+        }
+      }
+    }
+    return present;
+  }
+  
 }  // namespace adm

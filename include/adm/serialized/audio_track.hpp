@@ -25,7 +25,7 @@ namespace adm {
 
   /// @brief Tag for NamedType ::TrackId
   struct TrackIdTag {};
-  /// @brief NamedType for a speaker label
+  /// @brief NamedType for a track id
   using TrackId = detail::NamedType<unsigned int, TrackIdTag>;
 
   /// @brief Tag for AudioTrack

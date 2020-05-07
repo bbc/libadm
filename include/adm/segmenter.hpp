@@ -8,6 +8,8 @@
 #include <chrono>
 #include <map>
 #include <memory>
+#include <bw64/bw64.hpp>
+
 
 namespace adm {
 
@@ -95,6 +97,7 @@ namespace adm {
      */
     ADM_EXPORT void addTransportTrackFormat(
         const TransportTrackFormat& transportTrackFormat);
+    
     /**
      * @brief Get a Frame with the given interval
      *
@@ -106,6 +109,28 @@ namespace adm {
     ADM_EXPORT std::shared_ptr<Frame> getFrame(SegmentStart start,
                                                SegmentDuration segDuration);
 
+    /**
+     * @brief Generates the transportTrackFormat element 
+     *
+     * Uses the chna chunk to get the information on the UIDs allocated to each track.
+     */
+    ADM_EXPORT TransportTrackFormat generateTransportTrackFormat(
+                                   std::shared_ptr<bw64::ChnaChunk> chnaChunk,
+                                   SegmentStart segStart,
+                                   SegmentDuration segDuration);
+      
+      
+    /**
+     * @brief Checks if audioTrackUID is present this frame
+     *
+     * Checks if the given audioTrackUidId_ref is present in the specified segment time
+     * using the audioObject start and duration that references it.
+     */
+    ADM_EXPORT bool checkAudioObjectTimes(AudioTrackUidId audioTrackUidId_ref,
+                            SegmentStart segStart,
+                            SegmentDuration segDuration);
+    
+    
    private:
     std::shared_ptr<Document> document_;
     std::shared_ptr<Frame> baseFrame_;
@@ -217,8 +242,8 @@ namespace adm {
     }
 
     return boost::make_iterator_range(begin, end);
-  }
-
+  }      
+    
   template <typename AudioBlockFormat>
   void sortBlockFormats(std::shared_ptr<AudioChannelFormat> channelFormat) {
     auto blockFormats = channelFormat->getElements<AudioBlockFormat>();
