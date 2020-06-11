@@ -11,16 +11,17 @@ namespace adm {
   const std::map<std::string, adm::AudioPackFormatId>
   audioPackFormatLookupTable() {
     return std::map<std::string, adm::AudioPackFormatId>{
+        {"0+1+0", adm::parseAudioPackFormatId("AP_00010001")},
         {"0+2+0", adm::parseAudioPackFormatId("AP_00010002")},
-        {"0+5+0", adm::parseAudioPackFormatId("AP_0001000c")},
+        {"0+5+0", adm::parseAudioPackFormatId("AP_00010003")},
         {"2+5+0", adm::parseAudioPackFormatId("AP_00010004")},
         {"4+5+0", adm::parseAudioPackFormatId("AP_00010005")},
         {"4+5+1", adm::parseAudioPackFormatId("AP_00010010")},
         {"3+7+0", adm::parseAudioPackFormatId("AP_00010007")},
         {"4+9+0", adm::parseAudioPackFormatId("AP_00010008")},
         {"9+10+3", adm::parseAudioPackFormatId("AP_00010009")},
-        // {"0+7+0", adm::parseAudioPackFormatId("")},
-        // {"4+7+0", adm::parseAudioPackFormatId("")},
+        {"0+7+0", adm::parseAudioPackFormatId("AP_0001000f")},
+        {"4+7+0", adm::parseAudioPackFormatId("AP_00010017")},
         {"SN3D-Order1-3D", adm::parseAudioPackFormatId("AP_00040001")},
         {"SN3D-Order2-3D", adm::parseAudioPackFormatId("AP_00040002")},
         {"SN3D-Order3-3D", adm::parseAudioPackFormatId("AP_00040003")},
@@ -87,7 +88,7 @@ namespace adm {
         // {"B+030", adm::parseAudioTrackFormatId("")},
         // {"B-030", adm::parseAudioTrackFormatId("")},
         {"B+045", adm::parseAudioTrackFormatId("AT_00010016_01")},
-        {"B-045", adm::parseAudioTrackFormatId("AT_00010016_01")},
+        {"B-045", adm::parseAudioTrackFormatId("AT_00010017_01")},
         // {"B+060", adm::parseAudioTrackFormatId("")},
         // {"B-060", adm::parseAudioTrackFormatId("")},
         // {"B+090", adm::parseAudioTrackFormatId("")},
@@ -97,6 +98,7 @@ namespace adm {
         // {"B+135", adm::parseAudioTrackFormatId("")},
         // {"B-135", adm::parseAudioTrackFormatId("")},
         // {"B+180", adm::parseAudioTrackFormatId("")},
+        {"LFE", adm::parseAudioTrackFormatId("AT_00010004_01")},
         {"LFE1", adm::parseAudioTrackFormatId("AT_00010020_01")},
         {"LFE2", adm::parseAudioTrackFormatId("AT_00010021_01")}};
   };
@@ -104,32 +106,33 @@ namespace adm {
   const std::map<std::string, std::vector<std::string>>
   speakerLabelsLookupTable() {
     return std::map<std::string, std::vector<std::string>>{
+        {"0+1+0", {"M+000"}},
         {"0+2+0", {"M+030", "M-030"}},
-        {"0+5+0", {"M+030", "M-030", "M+000", "LFE1", "M+110", "M-110"}},
+        {"0+5+0", {"M+030", "M-030", "M+000", "LFE", "M+110", "M-110"}},
         {"2+5+0",
-         {"M+030", "M-030", "M+000", "LFE1", "M+110", "M-110", "U+030",
+         {"M+030", "M-030", "M+000", "LFE", "M+110", "M-110", "U+030",
           "U-030"}},
         {"4+5+0",
-         {"M+030", "M-030", "M+000", "LFE1", "M+110", "M-110", "U+030", "U-030",
+         {"M+030", "M-030", "M+000", "LFE", "M+110", "M-110", "U+030", "U-030",
           "U+110", "U-110"}},
         {"4+5+1",
-         {"M+030", "M-030", "M+000", "LFE1", "M+110", "M-110", "U+030", "U-030",
+         {"M+030", "M-030", "M+000", "LFE", "M+110", "M-110", "U+030", "U-030",
           "U+110", "U-110", "B+000"}},
         {"3+7+0",
          {"M+000", "M+030", "M-030", "U+045", "U-045", "M+090", "M-090",
           "M+135", "M-135", "UH+180", "LFE1", "LFE2"}},
         {"4+9+0",
-         {"M+030", "M-030", "M+000", "LFE1", "M+090", "M-090", "M+135", "M-135",
+         {"M+030", "M-030", "M+000", "LFE", "M+090", "M-090", "M+135", "M-135",
           "U+045", "U-045", "U+135", "U-135", "M+SC", "M-SC"}},
         {"9+10+3", {"M+060", "M-060", "M+000", "LFE1",  "M+135", "M-135",
                     "M+030", "M-030", "M+180", "LFE2",  "M+090", "M-090",
                     "U+045", "U-045", "U+000", "T+000", "U+135", "U-135",
                     "U+090", "U-090", "U+180", "B+000", "B+045", "B-045"}},
         {"0+7+0",
-         {"M+030", "M-030", "M+000", "LFE1", "M+090", "M-090", "M+135",
+         {"M+030", "M-030", "M+000", "LFE", "M+090", "M-090", "M+135",
           "M-135"}},
         {"4+7+0",
-         {"M+030", "M-030", "M+000", "LFE1", "M+090", "M-090", "M+135", "M-135",
+         {"M+030", "M-030", "M+000", "LFE", "M+090", "M-090", "M+135", "M-135",
           "U+045", "U-045", "U+135", "U-135"}}};
   }
 

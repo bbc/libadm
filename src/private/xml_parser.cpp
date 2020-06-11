@@ -2,8 +2,6 @@
 #include "adm/common_definitions.hpp"
 #include "adm/private/xml_parser_helper.hpp"
 #include "adm/errors.hpp"
-//#include "adm/private/rapidxml_utils.hpp"
-
 namespace adm {
   namespace xml {
 
@@ -270,19 +268,35 @@ namespace adm {
       if(document_->lookup(id) != nullptr) {
         throw error::XmlParsingDuplicateId(formatId(id), getDocumentLine(node));
       }
-      auto audioPackFormat = AudioPackFormat::create(name, id.get<TypeDescriptor>(), id);
+      auto typeDescriptor = id.get<TypeDescriptor>();
 
       auto typeLabel = parseOptionalAttribute<TypeDescriptor>(node, "typeLabel", &parseTypeLabel);
       auto typeDefinition = parseOptionalAttribute<TypeDescriptor>(node, "typeDefinition", &parseTypeDefinition);
       checkChannelType(id, typeLabel, typeDefinition);
 
+      if(typeDescriptor == adm::TypeDefinition::HOA){
+          auto audioPackFormat = AudioPackFormatHoa::create(name, id);
+          setCommonProperties(audioPackFormat, node);
+          setOptionalAttribute<Normalization>(node, "normalization", audioPackFormat);
+          setOptionalAttribute<ScreenRef>(node, "screenRef", audioPackFormat);
+          setOptionalAttribute<NfcRefDist>(node, "nfcRefDist", audioPackFormat);
+          return audioPackFormat;
+      } else {
+          auto audioPackFormat = AudioPackFormat::create(name, typeDescriptor, id);
+          setCommonProperties(audioPackFormat, node);
+          return audioPackFormat;
+      }
+      // clang-format on
+    }
+
+    void XmlParser::setCommonProperties(
+        std::shared_ptr<AudioPackFormat> audioPackFormat, NodePtr node) {
+      // clang-format off
       setOptionalAttribute<Importance>(node, "importance", audioPackFormat);
       setOptionalAttribute<AbsoluteDistance>(node, "absoluteDistance", audioPackFormat);
-
       addOptionalReferences<AudioChannelFormatId>(node, "audioChannelFormatIDRef", audioPackFormat, packFormatChannelFormatRefs_, &parseAudioChannelFormatId);
       addOptionalReferences<AudioPackFormatId>(node, "audioPackFormatIDRef", audioPackFormat, packFormatPackFormatRefs_, &parseAudioPackFormatId);
       // clang-format on
-      return audioPackFormat;
     }
 
     std::shared_ptr<AudioChannelFormat> XmlParser::parseAudioChannelFormat(
@@ -321,9 +335,9 @@ namespace adm {
         }
       } else if (audioChannelFormat->get<TypeDescriptor>() ==
                  TypeDefinition::HOA) {
-        // for (auto& element : elements) {
-        //    audioChannelFormat->add(parseAudioBlockFormatHoa(element));
-        // }
+         for (auto& element : elements) {
+            audioChannelFormat->add(parseAudioBlockFormatHoa(element));
+         }
       } else if (audioChannelFormat->get<TypeDescriptor>() ==
                  TypeDefinition::BINAURAL) {
         // for (auto& element : elements) {
@@ -614,6 +628,25 @@ namespace adm {
     AudioProgrammeReferenceScreen parseAudioProgrammeReferenceScreen(
         NodePtr /* node */) {
       return AudioProgrammeReferenceScreen();
+    }
+
+    /* Below here Hoa */
+
+    AudioBlockFormatHoa parseAudioBlockFormatHoa(
+        NodePtr node) {
+        AudioBlockFormatHoa audioBlockFormat{Order(), Degree()};
+      // clang-format off
+      setOptionalAttribute<AudioBlockFormatId>(node, "audioBlockFormatID", audioBlockFormat, &parseAudioBlockFormatId);
+      setOptionalAttribute<Rtime>(node, "rtime", audioBlockFormat, &parseTimecode);
+      setOptionalAttribute<Duration>(node, "duration", audioBlockFormat, &parseTimecode);
+      setOptionalElement<Order>(node, "order", audioBlockFormat);
+      setOptionalElement<Degree>(node, "degree", audioBlockFormat);
+      setOptionalElement<NfcRefDist>(node, "nfcRefDist", audioBlockFormat);
+      setOptionalElement<ScreenRef>(node, "screenRef", audioBlockFormat);
+      setOptionalElement<Normalization>(node, "normalization", audioBlockFormat);
+      setOptionalElement<Equation>(node, "equation", audioBlockFormat);
+      // clang-format on
+      return audioBlockFormat;
     }
 
   }  // namespace xml

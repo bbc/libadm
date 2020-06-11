@@ -10,6 +10,7 @@
 #include "adm/parse.hpp"
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
+#include "adm/elements/audio_pack_format_hoa.hpp"
 
 namespace adm {
   /**
@@ -45,6 +46,7 @@ namespace adm {
         NodePtr node);
     SpeakerPosition parseSpeakerPosition(std::vector<NodePtr> node);
     SpeakerLabel parseSpeakerLabel(NodePtr node);
+    AudioBlockFormatHoa parseAudioBlockFormatHoa(NodePtr node);
 
     NodePtr findAudioFormatExtendedNodeEbuCore(NodePtr root);
     NodePtr findAudioFormatExtendedNodeFullRecursive(NodePtr root);
@@ -117,6 +119,8 @@ namespace adm {
           }
         }
       }
+      void setCommonProperties(std::shared_ptr<AudioPackFormat> audioPackFormat,
+                               NodePtr node);
     };
 
   }  // namespace xml

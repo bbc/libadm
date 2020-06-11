@@ -380,9 +380,9 @@ namespace adm {
       node.addOptionalElement<ChannelLock>(&audioBlock, "channelLock", &formatChannelLock);
       node.addOptionalElement<ObjectDivergence>(&audioBlock, "objectDivergence", &formatObjectDivergence);
       node.addOptionalElement<JumpPosition>(&audioBlock, "jumpPosition", &formatJumpPosition);
+      node.addOptionalElement<ScreenRef>(&audioBlock, "screenRef");
       // clang-format on
       // TODO: add zoneExclusion
-      // TODO: add screenRef
       node.addOptionalElement<Importance>(&audioBlock, "importance");
     }
 
@@ -443,6 +443,12 @@ namespace adm {
       node.addOptionalAttribute<Lstart>(&audioBlock, "lstart");
       node.addOptionalAttribute<Lduration>(&audioBlock, "lduration");
       node.addOptionalAttribute<InitializeBlock>(&audioBlock, "initializeBlock");
+      node.addElement<Order>(&audioBlock, "order");
+      node.addElement<Degree>(&audioBlock, "degree");
+      node.addOptionalElement<NfcRefDist>(&audioBlock, "nfcRefDist");
+      node.addOptionalElement<ScreenRef>(&audioBlock, "screenRef");
+      node.addOptionalElement<Normalization>(&audioBlock, "normalization");
+      node.addOptionalElement<Equation>(&audioBlock, "equation");
       // TODO: add missing hoa attributes and elements
       // clang-format on
     }

@@ -13,7 +13,7 @@ namespace adm {
 
   /// @brief Load embedded common definitions file and create Frame
   ADM_EXPORT std::shared_ptr<Frame> getSadmCommonDefinitions();
-   
+  
   /// @brief Add embedded common definitions file to a Document
   ADM_EXPORT void addCommonDefinitionsTo(std::shared_ptr<Document> document);
 
@@ -22,6 +22,7 @@ namespace adm {
    *
    * Specified loudspeaker ids:
    *
+   *  - 0+1+0
    *  - 0+2+0
    *  - 0+5+0
    *  - 2+5+0
@@ -30,6 +31,8 @@ namespace adm {
    *  - 3+7+0
    *  - 4+9+0
    *  - 9+10+3
+   *  - 0+7+0
+   *  - 4+7+0
    *
    * @return Map with the loudspeaker id specified in ITU-R BS.2051 as key and
    * the corresponding AudioPackFormatID as value.
@@ -60,6 +63,7 @@ namespace adm {
    *
    * Specified loudspeaker ids:
    *
+   *  - 0+1+0
    *  - 0+2+0
    *  - 0+5+0
    *  - 2+5+0
@@ -68,6 +72,8 @@ namespace adm {
    *  - 3+7+0
    *  - 4+9+0
    *  - 9+10+3
+   *  - 0+7+0
+   *  - 4+7+0
    *
    * @return Map with the speaker label specified in ITU-R BS.2051 as key and
    * a vector of the corresponding speaker labels as value.
