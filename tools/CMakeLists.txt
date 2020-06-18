@@ -7,3 +7,6 @@ add_executable(adm_segmenter adm_segmenter.cpp)
 target_link_libraries(adm_segmenter PRIVATE adm)
 
 add_executable(resource_embedder resource_embedder.cpp)
+
+add_executable(bw64_segmenter bw64_segmenter.cpp)
+target_link_libraries(bw64_segmenter PRIVATE adm)

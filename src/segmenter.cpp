@@ -65,6 +65,7 @@ namespace adm {
 
   void Segmenter::addTransportTrackFormat(
       const TransportTrackFormat& transportTrackFormat) {
+    baseFrame_->frameHeader().clearTransportTrackFormats();  // It is assumed only one ttf is added
     baseFrame_->frameHeader().add(transportTrackFormat);
   }
 
