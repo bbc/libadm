@@ -12,8 +12,8 @@ using namespace bw64;
 using namespace adm;
 
 
-std::string genFilename(std::string pref, uint32_t ind);
-bool readChnaFile(std::string fname, std::shared_ptr<ChnaChunk> chnaChunk);
+std::string genSadmFilename(std::string pref, uint32_t ind);
+std::string genWavFilename(std::string pref, uint32_t ind);
 
 
 int main(int argc, char const *argv[]) {
@@ -42,14 +42,6 @@ int main(int argc, char const *argv[]) {
   std::stringstream adm_data(""); 
   axmlChunk->write(adm_data);
   auto document = parseXml(adm_data);
-    
-  //auto document = parseXml(adm_fname);
-  
-  /*auto chnaChunk = std::make_shared<ChnaChunk>();
-  if (!readChnaFile(chna_fname, chnaChunk)) {
-    std::cerr << "No chna chnuk" << std::endl;
-    exit(-1);
-  }*/
      
   std::chrono::nanoseconds filelength((uint64_t)(max_fr * size) * 1000000L);
   for (auto programme : document->getElements<AudioProgramme>()) {
@@ -76,10 +68,25 @@ int main(int argc, char const *argv[]) {
     auto frame = segmenter.getFrame(segment_start, segment_size);
     writeXml(xmlStream, frame);
     
-    std::string fname = genFilename(fout_pre, fr);
+    std::string fname = genSadmFilename(fout_pre, fr);
     std::ofstream sfile(fname);
 
     sfile << xmlStream.str();
+    
+    // Generate wav file for frame
+    fname = genWavFilename(fout_pre, fr);
+    auto wavfile = writeFile(fname, bw64File->channels(), bw64File->sampleRate(),
+                           bw64File->bitDepth());
+    
+    // Read and write sample
+    uint32_t frame_size = (uint32_t)((double)size * (double)bw64File->sampleRate() / 1000.0);
+    std::vector<float> ibuffer(frame_size * bw64File->channels());
+    if (!bw64File->eof()) {
+      auto readFrames = bw64File->read(&ibuffer[0], frame_size);
+      wavfile->write(&ibuffer[0], readFrames);
+    }
+    
+    // Get ready for next frame
     xmlStream.str("");
     segment_start = SegmentStart(segment_start.get() + segment_size.get());
     fr++;
@@ -89,7 +96,7 @@ int main(int argc, char const *argv[]) {
 }
 
 
-std::string genFilename(std::string pref, uint32_t ind) {
+std::string genSadmFilename(std::string pref, uint32_t ind) {
   char c[256];
   sprintf(c, "%s_%05d.xml", pref.c_str(), ind);
   std::string s(c);
@@ -97,26 +104,11 @@ std::string genFilename(std::string pref, uint32_t ind) {
 }
 
 
-/**
- * Reads a CHNA file and populates chnaChunk
- */
-bool readChnaFile(std::string fname, std::shared_ptr<ChnaChunk> chnaChunk) {
-  std::string line;
-  std::ifstream fchna(fname);
-  if (fchna.is_open()) {
-    while (std::getline(fchna, line)) {
-      std::stringstream ss(line);
-      std::string word;
-      std::vector<std::string> words;
-      while (std::getline(ss, word, ' ')) {
-        words.push_back(word);
-      }
-      if (words.size() == 4) {
-        chnaChunk->addAudioId(AudioId(std::stoi(words[0]), words[1], words[2], words[3])); 
-      }
-    }
-    fchna.close();
-    return true;
-  }
-  else return false;
+std::string genWavFilename(std::string pref, uint32_t ind) {
+  char c[256];
+  sprintf(c, "%s_%05d.wav", pref.c_str(), ind);
+  std::string s(c);
+  return s;
 }
+
+
