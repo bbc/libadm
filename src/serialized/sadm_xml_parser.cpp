@@ -6,7 +6,7 @@
 #include "adm/private/rapidxml_utils.hpp"
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
-#include "adm/private/xml_parser.hpp"
+//#include "adm/private/xml_parser.hpp"
 #include <iostream>
 
 namespace adm {
@@ -231,19 +231,35 @@ namespace adm {
       if(frame_->lookup(id) != nullptr) {
         throw error::XmlParsingDuplicateId(formatId(id), getDocumentLine(node));
       }
-      auto audioPackFormat = AudioPackFormat::create(name, id.get<TypeDescriptor>(), id);
+      auto typeDescriptor = id.get<TypeDescriptor>();
 
       auto typeLabel = parseOptionalAttribute<TypeDescriptor>(node, "typeLabel", &parseTypeLabel);
       auto typeDefinition = parseOptionalAttribute<TypeDescriptor>(node, "typeDefinition", &parseTypeDefinition);
       checkChannelType(id, typeLabel, typeDefinition);
+      
+      if (typeDescriptor == adm::TypeDefinition::HOA) {
+        auto audioPackFormat = AudioPackFormatHoa::create(name, id);
+        setCommonProperties(audioPackFormat, node);
+        setOptionalAttribute<Normalization>(node, "normalization", audioPackFormat);
+        setOptionalAttribute<ScreenRef>(node, "screenRef", audioPackFormat);
+        setOptionalAttribute<NfcRefDist>(node, "nfcRefDist", audioPackFormat);
+        return audioPackFormat;
+      } else {
+        auto audioPackFormat = AudioPackFormat::create(name, typeDescriptor, id);
+        setCommonProperties(audioPackFormat, node);
+        return audioPackFormat;
+      }
+      // clang-format on
+    }
 
+    void SadmXmlParser::setCommonProperties(
+        std::shared_ptr<AudioPackFormat> audioPackFormat, NodePtr node) {
+      // clang-format off
       setOptionalAttribute<Importance>(node, "importance", audioPackFormat);
       setOptionalAttribute<AbsoluteDistance>(node, "absoluteDistance", audioPackFormat);
-
       addOptionalReferences<AudioChannelFormatId>(node, "audioChannelFormatIDRef", audioPackFormat, packFormatChannelFormatRefs_, &parseAudioChannelFormatId);
       addOptionalReferences<AudioPackFormatId>(node, "audioPackFormatIDRef", audioPackFormat, packFormatPackFormatRefs_, &parseAudioPackFormatId);
       // clang-format on
-      return audioPackFormat;
     }
 
     std::shared_ptr<AudioChannelFormat> SadmXmlParser::parseAudioChannelFormat(

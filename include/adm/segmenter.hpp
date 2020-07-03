@@ -153,7 +153,7 @@ namespace adm {
     auto foundBlockFormats =
         findBlockFormats(item.channelFormat->getElements<AudioBlockFormat>(),
                          segStart, segDuration, item.start, item.end);
-
+    
     auto blockFormatsDest = dest->getElements<AudioBlockFormat>();
     for (auto blockFormat : foundBlockFormats) {
       auto it = std::find_if(

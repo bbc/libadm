@@ -90,8 +90,9 @@ namespace adm {
           for (auto id : entry.second) {
             if (frame_->lookup(id) != nullptr) {
               entry.first->addReference(frame_->lookup(id));
+            } else {
+              throw error::XmlParsingUnresolvedReference(formatId(id));
             }
-            else std::runtime_error("ID not found");
           }
         }
       }
@@ -103,10 +104,13 @@ namespace adm {
           if (auto element = frame_->lookup(id)) {
             entry.first->setReference(element);
           } else {
-            std::runtime_error("ID not found");
+            throw error::XmlParsingUnresolvedReference(formatId(id));
           }
         }
       }
+      
+      void setCommonProperties(std::shared_ptr<AudioPackFormat> audioPackFormat,
+                               NodePtr node);
     };
 
   }  // namespace xml
