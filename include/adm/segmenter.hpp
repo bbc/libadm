@@ -15,13 +15,36 @@ namespace adm {
 
   namespace detail {
     struct SegmenterItem {
-      SegmenterItem(std::shared_ptr<const AudioChannelFormat> channelFormat,
+      SegmenterItem(std::shared_ptr<const AudioProgramme> programme,
+                    std::shared_ptr<const AudioContent> content,
+                    std::vector<std::shared_ptr<const AudioObject>> objects,
+                    std::vector<std::shared_ptr<const AudioPackFormat>> packFormats,
+                    std::shared_ptr<const AudioChannelFormat> channelFormat,
+                    std::shared_ptr<const AudioStreamFormat> streamFormat,
+                    std::shared_ptr<const AudioTrackFormat> trackFormat,
+                    std::shared_ptr<const AudioTrackUid> trackUid,
                     std::chrono::nanoseconds start,
                     boost::optional<std::chrono::nanoseconds> end)
-          : channelFormat(channelFormat), start(start), end(end){};
+          : programme(programme),
+            content(content),
+            objects(objects),
+            packFormats(packFormats),
+            channelFormat(channelFormat),
+            streamFormat(streamFormat),
+            trackFormat(trackFormat),
+            trackUid(trackUid),
+            start(start), end(end){};
+      std::shared_ptr<const AudioProgramme> programme;
+      std::shared_ptr<const AudioContent> content;
+      std::vector<std::shared_ptr<const AudioObject>> objects;
+      std::vector<std::shared_ptr<const AudioPackFormat>> packFormats;
       std::shared_ptr<const AudioChannelFormat> channelFormat;
+      std::shared_ptr<const AudioStreamFormat> streamFormat;
+      std::shared_ptr<const AudioTrackFormat> trackFormat;
+      std::shared_ptr<const AudioTrackUid> trackUid;
       std::chrono::nanoseconds start;
       boost::optional<std::chrono::nanoseconds> end;
+      bool use;
     };
   }  // namespace detail
 
@@ -108,7 +131,7 @@ namespace adm {
      */
     ADM_EXPORT std::shared_ptr<Frame> getFrame(SegmentStart start,
                                                SegmentDuration segDuration);
-
+    
     /**
      * @brief Generates the transportTrackFormat element 
      *
@@ -132,6 +155,8 @@ namespace adm {
     
     
    private:
+    void fixReferences();
+    
     std::shared_ptr<Document> document_;
     std::shared_ptr<Frame> baseFrame_;
     std::vector<detail::SegmenterItem> segmenterItems_;
@@ -146,26 +171,50 @@ namespace adm {
    * AudioChannelFormat
    */
   template <typename AudioBlockFormat>
-  void addItemToChannelFormat(const detail::SegmenterItem& item,
+  uint32_t addItemToChannelFormat(const detail::SegmenterItem& item,
                               SegmentStart segStart,
                               SegmentDuration segDuration,
                               std::shared_ptr<AudioChannelFormat> dest) {
+    //std::cout << "addItemToChannelFormat: " << formatTimecode(segStart.get()) << " ";
+    //std::cout << formatTimecode(segDuration.get()) << " ";
+    //std::cout << (double)item.start.count() / 1.0e9 << " ";
+    //std::cout << (double)item.end->count() / 1.0e9 << std::endl;
     auto foundBlockFormats =
         findBlockFormats(item.channelFormat->getElements<AudioBlockFormat>(),
                          segStart, segDuration, item.start, item.end);
     
     auto blockFormatsDest = dest->getElements<AudioBlockFormat>();
+    //std::cout << "addItemToChannelFormat: size=" << foundBlockFormats.size() << " ";
+
+    uint32_t numBlocks = 0;
     for (auto blockFormat : foundBlockFormats) {
-      auto it = std::find_if(
+      bool found = false;
+      for (auto blockFormatDest : blockFormatsDest) {
+        if (blockFormatDest.template get<AudioBlockFormatId>() == 
+            blockFormat.template get<AudioBlockFormatId>()) {
+          found = true;
+        }
+        if (!found) {
+          dest->add(blockFormat);
+        }
+        numBlocks++;
+      }
+      
+      /*auto it = std::find_if(
           blockFormatsDest.begin(), blockFormatsDest.end(),
           [&blockFormat](const AudioBlockFormat& blockFormatDest) {
             return blockFormatDest.template get<AudioBlockFormatId>() ==
                    blockFormat.template get<AudioBlockFormatId>();
-          });
-      if (it == blockFormatsDest.end()) {
+          });*/
+      /*if (it == blockFormatsDest.end()) {
+        std::cout << "not found";
         dest->add(blockFormat);
-      }
+        numBlocks++;
+      } 
+      else std::cout << "found";*/
     }
+    //std::cout << std::endl;
+    return numBlocks;
   }
 
   /**
@@ -180,7 +229,7 @@ namespace adm {
                    std::chrono::nanoseconds objectStart,
                    boost::optional<std::chrono::nanoseconds> objectEnd) {
     typedef typename AudioBlockFormatRange::value_type AudioBlockFormat;
-
+    
     // object already ended before segment start -> return no blocks
     if (objectEnd && objectEnd < segStart.get()) {
       return boost::make_iterator_range(blockFormatSrc.end(),
