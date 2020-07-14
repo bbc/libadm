@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "adm/frame.hpp"
 
 #include <algorithm>
@@ -83,6 +85,40 @@ namespace adm {
     return audioFormatExtended_->add(trackUid);
   }
 
+  // ---- remove elements --- //
+  bool Frame::remove(std::shared_ptr<AudioProgramme> programme) {
+    return audioFormatExtended_->remove(programme);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioContent> content) {
+    return audioFormatExtended_->remove(content);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioObject> object) {
+    return audioFormatExtended_->remove(object);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioPackFormat> packFormat) {
+    return audioFormatExtended_->remove(packFormat);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioChannelFormat> channelFormat) {
+    return audioFormatExtended_->remove(channelFormat);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioStreamFormat> streamFormat) {
+    return audioFormatExtended_->remove(streamFormat);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioTrackFormat> trackFormat) {
+    return audioFormatExtended_->remove(trackFormat);
+  }
+
+  bool Frame::remove(std::shared_ptr<AudioTrackUid> trackUid) {
+    return audioFormatExtended_->remove(trackUid);
+  }
+  
+  
   // // ---- get elements ---- //
   // ElementRange<const AudioProgramme> Frame::getElements(
   //     detail::ParameterTraits<AudioProgramme>::tag) const {

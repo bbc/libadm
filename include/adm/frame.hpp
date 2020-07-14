@@ -66,6 +66,30 @@ namespace adm {
     ADM_EXPORT bool add(std::shared_ptr<AudioTrackUid> trackUid);
     ///@}
 
+    /** @name Remove ADM elements
+     *
+     * References from and to the ADM element will automatically be removed
+     * too.
+     */
+    ///@{
+    /// @brief Remove an AudioProgramme
+    ADM_EXPORT bool remove(std::shared_ptr<AudioProgramme> programme);
+    /// @brief Remove an AudioContent
+    ADM_EXPORT bool remove(std::shared_ptr<AudioContent> content);
+    /// @brief Remove an AudioObject
+    ADM_EXPORT bool remove(std::shared_ptr<AudioObject> object);
+    /// @brief Remove an AudioPackFormat
+    ADM_EXPORT bool remove(std::shared_ptr<AudioPackFormat> packFormat);
+    /// @brief Remove an AudioChannelFormat
+    ADM_EXPORT bool remove(std::shared_ptr<AudioChannelFormat> channelFormat);
+    /// @brief Remove an AudioStreamFormat
+    ADM_EXPORT bool remove(std::shared_ptr<AudioStreamFormat> streamFormat);
+    /// @brief Remove an AudioTrackFormat
+    ADM_EXPORT bool remove(std::shared_ptr<AudioTrackFormat> trackFormat);
+    /// @brief Remove an AudioTrackUid
+    ADM_EXPORT bool remove(std::shared_ptr<AudioTrackUid> trackUid);
+    ///@}
+    
     /**
      * @brief Adm elements getter template
      *
