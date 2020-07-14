@@ -15,10 +15,14 @@ namespace adm {
       }
       bool shouldRecurse(std::shared_ptr<const AudioObject>,
                          std::shared_ptr<const AudioTrackUid>) {
-        return false;
+        return true; // used to be false
       }
       bool shouldRecurse(std::shared_ptr<const AudioStreamFormat>,
                          std::shared_ptr<const AudioChannelFormat>) {
+        return false;
+      }
+      bool shouldRecurse(std::shared_ptr<const AudioStreamFormat>,
+                         std::shared_ptr<const AudioTrackFormat>) {
         return false;
       }
       template <typename Element>
@@ -146,13 +150,12 @@ namespace adm {
         if (subpack && this->shouldRecurse(audioTrackUid, subpack)) {
           trace(subpack, admRoute);
         }
-
         auto subtrack = audioTrackUid->getReference<AudioTrackFormat>();
         if (subtrack && this->shouldRecurse(audioTrackUid, subtrack)) {
           trace(subtrack, admRoute);
         }
         auto subchannel = audioTrackUid->getReference<AudioChannelFormat>();
-        if (subchannel && this->shouldRecurse(audioTrackUid, subtrack)) {
+        if (subchannel && this->shouldRecurse(audioTrackUid, subchannel)) {
           trace(subchannel, admRoute);
         }
         if (this->isEndOfRoute(audioTrackUid)) {
@@ -176,7 +179,6 @@ namespace adm {
         if (this->shouldAdd(audioStreamFormat)) {
           admRoute.add(audioStreamFormat);
         }
-
         auto subpack = audioStreamFormat->getReference<AudioPackFormat>();
         if (subpack && this->shouldRecurse(audioStreamFormat, subpack)) {
           trace(subpack, admRoute);
@@ -185,10 +187,9 @@ namespace adm {
              audioStreamFormat->getAudioTrackFormatReferences()) {
           auto subtrack = weak_subtrack.lock();
           if (subtrack && this->shouldRecurse(audioStreamFormat, subtrack)) {
-            trace(subpack, admRoute);
+            trace(subtrack, admRoute);
           }
         }
-
         auto subchannel = audioStreamFormat->getReference<AudioChannelFormat>();
         if (subchannel && this->shouldRecurse(audioStreamFormat, subchannel)) {
           trace(subchannel, admRoute);
