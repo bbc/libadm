@@ -57,10 +57,9 @@ int main(int argc, char const *argv[]) {
   while (segment_start < filelength && fr < max_fr) {
     auto transportTrackFormat = segmenter.generateTransportTrackFormat(chnaChunk, 
                                                              segment_start, segment_size);   
-
-    segmenter.addTransportTrackFormat(transportTrackFormat);
     
     auto frame = segmenter.getFrame(segment_start, segment_size);
+    segmenter.addTransportTrackFormat(transportTrackFormat);
     writeXml(xmlStream, frame);
     
     std::string fname = genFilename(fout_pre, fr);

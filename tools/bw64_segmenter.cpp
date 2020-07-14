@@ -63,9 +63,9 @@ int main(int argc, char const *argv[]) {
     auto transportTrackFormat = segmenter.generateTransportTrackFormat(chnaChunk, 
                                                              segment_start, segment_size);   
 
-    segmenter.addTransportTrackFormat(transportTrackFormat);
-    
     auto frame = segmenter.getFrame(segment_start, segment_size);
+    segmenter.addTransportTrackFormat(transportTrackFormat);
+
     writeXml(xmlStream, frame);
     
     std::string fname = genSadmFilename(fout_pre, fr);
