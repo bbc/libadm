@@ -175,45 +175,17 @@ namespace adm {
                               SegmentStart segStart,
                               SegmentDuration segDuration,
                               std::shared_ptr<AudioChannelFormat> dest) {
-    //std::cout << "addItemToChannelFormat: " << formatTimecode(segStart.get()) << " ";
-    //std::cout << formatTimecode(segDuration.get()) << " ";
-    //std::cout << (double)item.start.count() / 1.0e9 << " ";
-    //std::cout << (double)item.end->count() / 1.0e9 << std::endl;
     auto foundBlockFormats =
         findBlockFormats(item.channelFormat->getElements<AudioBlockFormat>(),
                          segStart, segDuration, item.start, item.end);
     
-    auto blockFormatsDest = dest->getElements<AudioBlockFormat>();
-    //std::cout << "addItemToChannelFormat: size=" << foundBlockFormats.size() << " ";
-
+    // Add valid blocks to destination channel
     uint32_t numBlocks = 0;
     for (auto blockFormat : foundBlockFormats) {
-      bool found = false;
-      for (auto blockFormatDest : blockFormatsDest) {
-        if (blockFormatDest.template get<AudioBlockFormatId>() == 
-            blockFormat.template get<AudioBlockFormatId>()) {
-          found = true;
-        }
-        if (!found) {
-          dest->add(blockFormat);
-        }
-        numBlocks++;
-      }
-      
-      /*auto it = std::find_if(
-          blockFormatsDest.begin(), blockFormatsDest.end(),
-          [&blockFormat](const AudioBlockFormat& blockFormatDest) {
-            return blockFormatDest.template get<AudioBlockFormatId>() ==
-                   blockFormat.template get<AudioBlockFormatId>();
-          });*/
-      /*if (it == blockFormatsDest.end()) {
-        std::cout << "not found";
-        dest->add(blockFormat);
-        numBlocks++;
-      } 
-      else std::cout << "found";*/
+      dest->add(blockFormat);
+      numBlocks++;
     }
-    //std::cout << std::endl;
+
     return numBlocks;
   }
 
@@ -236,8 +208,8 @@ namespace adm {
                                         blockFormatSrc.end());
     }
 
-    // object did not begin before segment start -> return no blocks
-    if (objectStart > segStart.get()) {
+    // object did not begin before segment end -> return no blocks
+    if (objectStart > segStart.get() + segDuration.get()) {
       return boost::make_iterator_range(blockFormatSrc.end(),
                                         blockFormatSrc.end());
     }
@@ -252,42 +224,31 @@ namespace adm {
       effectiveEnd = objectEnd.get();
     }
 
-    // search first block which is within search range
-    auto begin = std::find_if(
-        blockFormatSrc.begin(), blockFormatSrc.end(),
-        [&objectStart, &effectiveStart,
-         &effectiveEnd](const AudioBlockFormat blockFormat) {
-          return effectiveStart <
-                 objectStart + blockFormat.template get<Rtime>().get();
-        });
+    // Find the first and last valid blocks
+    auto begin = blockFormatSrc.end();
+    auto end = blockFormatSrc.begin();
+    for (auto it = blockFormatSrc.begin() ; it != blockFormatSrc.end(); it++) {
+      auto blockFormat = *it;
+      auto seg_end = segStart.get() + segDuration.get();
+      auto block_start = objectStart + blockFormat.template get<Rtime>().get();
+      auto block_end = seg_end;
+      if (blockFormat.template has<Duration>()) {
+        block_end = objectStart + blockFormat.template get<Rtime>().get() + blockFormat.template get<Duration>().get();
+      }
 
-    // search next block which is outside the search range
-    auto end = std::find_if(
-        begin, blockFormatSrc.end(),
-        [&objectStart, &effectiveEnd](const AudioBlockFormat blockFormat) {
-          return effectiveEnd <=
-                 objectStart + blockFormat.template get<Rtime>().get();
-        });
-
-    // Two blockformats before the first block within the search range could
-    // be relevant
-    if (begin != blockFormatSrc.begin()) {
-      --begin;
-      if (begin != blockFormatSrc.begin()) {
-        --begin;
+      if (block_start < seg_end && block_end > segStart.get()) {
+        if (begin == blockFormatSrc.end()) {
+          begin = it;
+        }
+        end = it;
       }
     }
-
-    // First AudioBlockFormat did not start yet ->  return no blocks
-    if (begin == end) {
-      return boost::make_iterator_range(blockFormatSrc.end(),
-                                        blockFormatSrc.end());
-    }
-
-    // One block after the next block, which is outside the search range,
-    // could be relevant (to calc the duration of the block).
-    if (end != blockFormatSrc.end()) {
-      ++end;
+    // If last block has been set move past one to end
+    if (end != blockFormatSrc.begin()) {
+      end++;
+    } else {  
+      // Otherwise set to end of iterator
+      end = blockFormatSrc.end();
     }
 
     return boost::make_iterator_range(begin, end);

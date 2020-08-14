@@ -49,10 +49,14 @@ namespace adm {
             objectStart = object->get<Start>().get();
           }
           if (object->has<Duration>()) {
-            if (objectStart + object->get<Duration>().get() <= objectEnd) {
+            if (objectEnd) {
+              if (objectStart + object->get<Duration>().get() <= objectEnd) {
+                objectEnd = objectStart + object->get<Duration>().get();
+              }
+            } else {
               objectEnd = objectStart + object->get<Duration>().get();
             }
-          } 
+          }
         }
         
         detail::SegmenterItem newItem(programme, content, objects,
@@ -108,7 +112,10 @@ namespace adm {
       if (item.streamFormat != nullptr) {
         streamFormatDest = item.streamFormat->copy();
       }
+      
       std::shared_ptr<AudioChannelFormat> channelFormatDest = item.channelFormat->copy();
+      channelFormatDest->clearAudioBlockFormats();  // Clear blocks, as they will be populated later
+      
       std::vector<std::shared_ptr<AudioPackFormat>> packFormatDests;
       for (auto &packFormat : item.packFormats) {
         packFormatDests.push_back(packFormat->copy());

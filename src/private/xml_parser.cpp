@@ -335,9 +335,9 @@ namespace adm {
         }
       } else if (audioChannelFormat->get<TypeDescriptor>() ==
                  TypeDefinition::HOA) {
-         for (auto& element : elements) {
-            audioChannelFormat->add(parseAudioBlockFormatHoa(element));
-         }
+        for (auto& element : elements) {
+          audioChannelFormat->add(parseAudioBlockFormatHoa(element));
+        }
       } else if (audioChannelFormat->get<TypeDescriptor>() ==
                  TypeDefinition::BINAURAL) {
         // for (auto& element : elements) {
